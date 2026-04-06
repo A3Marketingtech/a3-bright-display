@@ -13,11 +13,12 @@ export function useNews(apiKey: string) {
           `https://gnews.io/api/v4/top-headlines?lang=pt&country=br&max=10&apikey=${apiKey}`
         );
         const data = await res.json();
-        if (data.articles) {
+        const articles = data?.articles;
+        if (Array.isArray(articles) && articles.length > 0) {
           setNews(
-            data.articles.map((a: any) => ({
+            articles.map((a: any) => ({
               title: a.title,
-              source: a.source.name,
+              source: a.source?.name ?? "Desconhecido",
               publishedAt: a.publishedAt,
             }))
           );
