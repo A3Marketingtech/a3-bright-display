@@ -1,0 +1,409 @@
+import { useState, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import type { MediaItem, AppSettings, SyncStatus } from "@/lib/types";
+
+interface ManagementPanelProps {
+  open: boolean;
+  onClose: () => void;
+  mediaItems: MediaItem[];
+  settings: AppSettings;
+  syncStatus: SyncStatus;
+  onAddMedia: (item: Omit<MediaItem, "id" | "order">) => Promise<void>;
+  onRemoveMedia: (id: string) => Promise<void>;
+  onReorderMedia: (items: MediaItem[]) => Promise<void>;
+  onUpdateDuration: (id: string, duration: number) => Promise<void>;
+  onSaveSettings: (settings: AppSettings) => Promise<void>;
+}
+
+type Tab = "add" | "media" | "settings";
+
+export function ManagementPanel({
+  open,
+  onClose,
+  mediaItems,
+  settings,
+  onAddMedia,
+  onRemoveMedia,
+  onUpdateDuration,
+  onSaveSettings,
+}: ManagementPanelProps) {
+  const [tab, setTab] = useState<Tab>("add");
+  const [url, setUrl] = useState("");
+  const [mediaName, setMediaName] = useState("");
+  const [mediaType, setMediaType] = useState<"image" | "video">("image");
+  const [localSettings, setLocalSettings] = useState(settings);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [testResult, setTestResult] = useState<string | null>(null);
+
+  const handleAddUrl = useCallback(async () => {
+    if (!url) return;
+    await onAddMedia({
+      name: mediaName || "Mídia sem nome",
+      url,
+      type: mediaType,
+      source: "url",
+      duration: 10,
+    });
+    setUrl("");
+    setMediaName("");
+  }, [url, mediaName, mediaType, onAddMedia]);
+
+  const handleFileUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      setUploading(true);
+      setUploadProgress(0);
+
+      // Simulate progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress((p) => Math.min(p + 10, 90));
+      }, 200);
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        clearInterval(progressInterval);
+        setUploadProgress(100);
+
+        const dataUrl = reader.result as string;
+        const isVideo = file.type.startsWith("video/");
+
+        await onAddMedia({
+          name: file.name,
+          url: dataUrl,
+          type: isVideo ? "video" : "image",
+          source: "local",
+          duration: 10,
+        });
+
+        setUploading(false);
+        setUploadProgress(0);
+      };
+      reader.readAsDataURL(file);
+    },
+    [onAddMedia]
+  );
+
+  const handleTestWeather = async () => {
+    try {
+      const res = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(localSettings.city)}&units=metric&lang=pt_br&appid=${localSettings.weatherApiKey}`
+      );
+      const data = await res.json();
+      if (data.main) {
+        setTestResult(`✅ Clima: ${data.main.temp}°C em ${data.name}`);
+      } else {
+        setTestResult(`❌ Erro: ${data.message || "Resposta inválida"}`);
+      }
+    } catch {
+      setTestResult("❌ Erro de conexão");
+    }
+    setTimeout(() => setTestResult(null), 5000);
+  };
+
+  const handleTestNews = async () => {
+    try {
+      const res = await fetch(
+        `https://gnews.io/api/v4/top-headlines?lang=pt&country=br&max=1&apikey=${localSettings.newsApiKey}`
+      );
+      const data = await res.json();
+      if (data.articles?.length) {
+        setTestResult(`✅ Notícias: "${data.articles[0].title.substring(0, 50)}..."`);
+      } else {
+        setTestResult(`❌ Erro: ${data.message || "Sem artigos"}`);
+      }
+    } catch {
+      setTestResult("❌ Erro de conexão");
+    }
+    setTimeout(() => setTestResult(null), 5000);
+  };
+
+  const tabs: { id: Tab; label: string }[] = [
+    { id: "add", label: "Adicionar" },
+    { id: "media", label: "Mídias" },
+    { id: "settings", label: "Configurações" },
+  ];
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="w-full max-w-2xl max-h-[85vh] bg-card border border-border rounded-2xl overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-5 border-b border-border">
+              <h2 className="font-display font-bold text-lg">
+                A<sup className="text-neon text-sm">3</sup> Gerenciamento
+              </h2>
+              <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors text-xl">
+                ✕
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-border">
+              {tabs.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setTab(t.id)}
+                  className={`flex-1 py-3 text-sm font-display font-medium transition-colors relative ${
+                    tab === t.id ? "text-neon" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {t.label}
+                  {tab === t.id && (
+                    <motion.div
+                      layoutId="tab-indicator"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-neon"
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-5">
+              {tab === "add" && (
+                <div className="space-y-6">
+                  {/* Google Drive */}
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-display font-semibold flex items-center gap-2">
+                      <span className="text-neon">📁</span> Google Drive (automático)
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Configure o ID da pasta nas Configurações. Mídias serão importadas automaticamente.
+                    </p>
+                  </div>
+
+                  <div className="h-px bg-border" />
+
+                  {/* URL */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-display font-semibold flex items-center gap-2">
+                      <span className="text-neon">🔗</span> URL Direta
+                    </h3>
+                    <input
+                      type="text"
+                      placeholder="Nome da mídia"
+                      value={mediaName}
+                      onChange={(e) => setMediaName(e.target.value)}
+                      className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm font-body focus:outline-none focus:border-neon/50 transition-colors"
+                    />
+                    <input
+                      type="url"
+                      placeholder="https://exemplo.com/imagem.jpg"
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                      className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm font-body focus:outline-none focus:border-neon/50 transition-colors"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setMediaType("image")}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-display font-medium border transition-colors ${
+                          mediaType === "image"
+                            ? "bg-neon text-primary-foreground border-neon"
+                            : "border-border text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        Imagem
+                      </button>
+                      <button
+                        onClick={() => setMediaType("video")}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-display font-medium border transition-colors ${
+                          mediaType === "video"
+                            ? "bg-neon text-primary-foreground border-neon"
+                            : "border-border text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        Vídeo
+                      </button>
+                    </div>
+                    <button
+                      onClick={handleAddUrl}
+                      disabled={!url}
+                      className="w-full bg-neon text-primary-foreground font-display font-semibold py-2.5 rounded-lg text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
+                    >
+                      Adicionar
+                    </button>
+                  </div>
+
+                  <div className="h-px bg-border" />
+
+                  {/* Upload */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-display font-semibold flex items-center gap-2">
+                      <span className="text-neon">📤</span> Upload Direto
+                    </h3>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*,video/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full border-2 border-dashed border-border hover:border-neon/30 rounded-xl py-8 flex flex-col items-center gap-2 transition-colors"
+                    >
+                      <span className="text-2xl">📤</span>
+                      <span className="text-sm text-muted-foreground">
+                        Arraste ou clique para selecionar
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Imagens e vídeos
+                      </span>
+                    </button>
+                    {uploading && (
+                      <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
+                        <div
+                          className="h-full bg-neon rounded-full transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {tab === "media" && (
+                <div className="space-y-2">
+                  {!mediaItems.length && (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      Nenhuma mídia adicionada
+                    </p>
+                  )}
+                  {mediaItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-3 p-3 bg-secondary rounded-lg border border-border hover:border-neon/20 transition-colors"
+                    >
+                      <div className="w-16 h-10 rounded-md overflow-hidden bg-background flex-shrink-0">
+                        {item.type === "image" ? (
+                          <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+                            🎬
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-body truncate">{item.name}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span
+                            className={`text-[10px] font-display font-medium px-1.5 py-0.5 rounded ${
+                              item.type === "image"
+                                ? "bg-neon/10 text-neon"
+                                : "bg-foreground/10 text-foreground/70"
+                            }`}
+                          >
+                            {item.type === "image" ? "IMG" : "VID"}
+                          </span>
+                          <span className="text-[10px] font-display font-medium px-1.5 py-0.5 rounded bg-foreground/5 text-muted-foreground uppercase">
+                            {item.source}
+                          </span>
+                        </div>
+                      </div>
+                      {item.type === "image" && (
+                        <input
+                          type="number"
+                          value={item.duration}
+                          onChange={(e) =>
+                            onUpdateDuration(item.id, parseInt(e.target.value) || 10)
+                          }
+                          className="w-14 bg-background border border-border rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-neon/50"
+                          min={3}
+                          max={120}
+                          title="Duração (seg)"
+                        />
+                      )}
+                      <button
+                        onClick={() => onRemoveMedia(item.id)}
+                        className="text-muted-foreground hover:text-destructive transition-colors text-sm"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {tab === "settings" && (
+                <div className="space-y-4">
+                  {[
+                    { label: "Cidade", key: "city" as const, placeholder: "São Paulo" },
+                    { label: "API Key OpenWeatherMap", key: "weatherApiKey" as const, placeholder: "Sua chave da API" },
+                    { label: "API Key GNews", key: "newsApiKey" as const, placeholder: "Sua chave da API" },
+                    { label: "ID Pasta Google Drive", key: "driveFolderId" as const, placeholder: "ID da pasta" },
+                    { label: "Senha do Painel", key: "password" as const, placeholder: "Mínimo 4 caracteres" },
+                  ].map((field) => (
+                    <div key={field.key} className="space-y-1.5">
+                      <label className="text-xs font-display font-medium text-muted-foreground">
+                        {field.label}
+                      </label>
+                      <input
+                        type={field.key === "password" ? "password" : "text"}
+                        value={localSettings[field.key]}
+                        onChange={(e) =>
+                          setLocalSettings((s) => ({ ...s, [field.key]: e.target.value }))
+                        }
+                        placeholder={field.placeholder}
+                        className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm font-body focus:outline-none focus:border-neon/50 transition-colors"
+                      />
+                    </div>
+                  ))}
+
+                  {testResult && (
+                    <div className="p-3 bg-secondary rounded-lg text-xs font-body border border-border">
+                      {testResult}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleTestWeather}
+                      className="flex-1 border border-border text-foreground font-display font-medium py-2 rounded-lg text-xs hover:border-neon/30 transition-colors"
+                    >
+                      Testar Clima
+                    </button>
+                    <button
+                      onClick={handleTestNews}
+                      className="flex-1 border border-border text-foreground font-display font-medium py-2 rounded-lg text-xs hover:border-neon/30 transition-colors"
+                    >
+                      Testar Notícias
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={async () => {
+                      await onSaveSettings(localSettings);
+                      setTestResult("✅ Configurações salvas e sincronizadas!");
+                      setTimeout(() => setTestResult(null), 3000);
+                    }}
+                    className="w-full bg-neon text-primary-foreground font-display font-bold py-3 rounded-lg text-sm hover:opacity-90 transition-opacity"
+                  >
+                    Salvar e Sincronizar Todas as Telas
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
