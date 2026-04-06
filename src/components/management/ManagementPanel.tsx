@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { MediaItem, AppSettings, SyncStatus } from "@/lib/types";
+import { fetchTopHeadlines } from "@/lib/gnews";
 
 interface ManagementPanelProps {
   open: boolean;
@@ -106,14 +107,11 @@ export function ManagementPanel({
 
   const handleTestNews = async () => {
     try {
-      const res = await fetch(
-        `https://gnews.io/api/v4/top-headlines?lang=pt&country=br&max=1&apikey=${localSettings.newsApiKey}`
-      );
-      const data = await res.json();
-      if (data.articles?.length) {
-        setTestResult(`✅ Notícias: "${data.articles[0].title.substring(0, 50)}..."`);
+      const articles = await fetchTopHeadlines(localSettings.newsApiKey, 1);
+      if (articles.length > 0) {
+        setTestResult(`✅ Notícias: "${articles[0].title.substring(0, 50)}..."`);
       } else {
-        setTestResult(`❌ Erro: ${data.message || "Sem artigos"}`);
+        setTestResult("❌ Erro: Sem artigos");
       }
     } catch {
       setTestResult("❌ Erro de conexão");
