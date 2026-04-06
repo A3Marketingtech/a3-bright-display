@@ -1,30 +1,23 @@
 import { useState, useEffect } from "react";
 import type { NewsItem } from "@/lib/types";
+import { fetchTopHeadlines } from "@/lib/gnews";
 
 export function useNews(apiKey: string) {
   const [news, setNews] = useState<NewsItem[]>([]);
 
   useEffect(() => {
-    if (!apiKey) return;
+    if (!apiKey) {
+      setNews([]);
+      return;
+    }
 
     const fetchNews = async () => {
       try {
-        const res = await fetch(
-          `https://gnews.io/api/v4/top-headlines?lang=pt&country=br&max=10&apikey=${apiKey}`
-        );
-        const data = await res.json();
-        const articles = data?.articles;
-        if (Array.isArray(articles) && articles.length > 0) {
-          setNews(
-            articles.map((a: any) => ({
-              title: a.title,
-              source: a.source?.name ?? "Desconhecido",
-              publishedAt: a.publishedAt,
-            }))
-          );
-        }
+        const articles = await fetchTopHeadlines(apiKey, 10);
+        setNews(articles);
       } catch (e) {
         console.error("News fetch error:", e);
+        setNews([]);
       }
     };
 
@@ -35,3 +28,4 @@ export function useNews(apiKey: string) {
 
   return news;
 }
+
