@@ -37,6 +37,28 @@ export function ManagementPanel({
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [testResult, setTestResult] = useState<string | null>(null);
+  const [cityInput, setCityInput] = useState("");
+
+  useEffect(() => {
+    setLocalSettings(settings);
+  }, [settings]);
+
+  const handleAddCity = useCallback(() => {
+    const city = cityInput.trim();
+    if (!city) return;
+    const current = localSettings.cities || [];
+    if (current.length >= 8) return;
+    if (current.some((c) => c.toLowerCase() === city.toLowerCase())) return;
+    setLocalSettings((s) => ({ ...s, cities: [...(s.cities || []), city] }));
+    setCityInput("");
+  }, [cityInput, localSettings.cities]);
+
+  const handleRemoveCity = useCallback((index: number) => {
+    setLocalSettings((s) => ({
+      ...s,
+      cities: (s.cities || []).filter((_, i) => i !== index),
+    }));
+  }, []);
 
   const handleAddUrl = useCallback(async () => {
     if (!url) return;
