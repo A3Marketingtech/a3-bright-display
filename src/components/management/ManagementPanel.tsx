@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { MediaItem, AppSettings, SyncStatus } from "@/lib/types";
 import { fetchTopHeadlines } from "@/lib/gnews";
@@ -375,8 +375,49 @@ export function ManagementPanel({
 
               {tab === "settings" && (
                 <div className="space-y-4">
+                  {/* Cities Section */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-display font-medium text-muted-foreground">
+                      🌍 Cidades do Widget de Clima
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Nome da cidade (ex: London)"
+                        value={cityInput}
+                        onChange={(e) => setCityInput(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleAddCity()}
+                        className="flex-1 bg-secondary border border-border rounded-lg px-3 py-2 text-sm font-body focus:outline-none focus:border-neon/50 transition-colors"
+                      />
+                      <button
+                        onClick={handleAddCity}
+                        disabled={!cityInput.trim() || (localSettings.cities?.length || 0) >= 8}
+                        className="bg-neon text-primary-foreground font-display font-semibold px-4 py-2 rounded-lg text-xs hover:opacity-90 transition-opacity disabled:opacity-40"
+                      >
+                        Adicionar
+                      </button>
+                    </div>
+                    <div className="space-y-1">
+                      {(localSettings.cities || []).map((city, i) => (
+                        <div key={i} className="flex items-center justify-between p-2 bg-secondary rounded-lg border border-border">
+                          <span className="text-sm font-body">{city}</span>
+                          <button
+                            onClick={() => handleRemoveCity(i)}
+                            className="text-muted-foreground hover:text-destructive transition-colors text-sm"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">
+                      {(localSettings.cities?.length || 0)}/8 cidades • Alternam a cada 5 segundos
+                    </p>
+                  </div>
+
+                  <div className="h-px bg-border" />
+
                   {[
-                    { label: "Cidade", key: "city" as const, placeholder: "São Paulo" },
                     { label: "API Key OpenWeatherMap", key: "weatherApiKey" as const, placeholder: "Sua chave da API" },
                     { label: "API Key GNews", key: "newsApiKey" as const, placeholder: "Sua chave da API" },
                     { label: "ID Pasta Google Drive", key: "driveFolderId" as const, placeholder: "ID da pasta" },
