@@ -10,6 +10,7 @@ export interface MediaItem {
 
 export interface AppSettings {
   city: string;
+  cities: string[];
   weatherApiKey: string;
   newsApiKey: string;
   driveFolderId: string;

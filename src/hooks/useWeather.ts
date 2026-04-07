@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { WeatherData } from "@/lib/types";
 
 const WEATHER_EMOJIS: Record<string, string> = {
@@ -9,35 +9,40 @@ const WEATHER_EMOJIS: Record<string, string> = {
   "50d": "🌫️", "50n": "🌫️",
 };
 
-export function useWeather(city: string, apiKey: string) {
-  const [weather, setWeather] = useState<WeatherData | null>(null);
+export function useWeather(cities: string[], apiKey: string) {
+  const [weatherList, setWeatherList] = useState<WeatherData[]>([]);
+  const citiesKey = cities.join(",");
 
   useEffect(() => {
-    if (!city || !apiKey) return;
+    if (!cities.length || !apiKey) return;
 
-    const fetchWeather = async () => {
-      try {
-        const res = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&lang=pt_br&appid=${apiKey}`
-        );
-        const data = await res.json();
-        if (data.main) {
-          setWeather({
-            temp: Math.round(data.main.temp),
-            description: data.weather[0].description,
-            icon: WEATHER_EMOJIS[data.weather[0].icon] || "🌤️",
-            city: data.name,
-          });
+    const fetchAll = async () => {
+      const results: WeatherData[] = [];
+      for (const city of cities) {
+        try {
+          const res = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&lang=pt_br&appid=${apiKey}`
+          );
+          const data = await res.json();
+          if (data.main) {
+            results.push({
+              temp: Math.round(data.main.temp),
+              description: data.weather[0].description,
+              icon: WEATHER_EMOJIS[data.weather[0].icon] || "🌤️",
+              city: data.name,
+            });
+          }
+        } catch (e) {
+          console.error(`Weather fetch error for ${city}:`, e);
         }
-      } catch (e) {
-        console.error("Weather fetch error:", e);
       }
+      setWeatherList(results);
     };
 
-    fetchWeather();
-    const interval = setInterval(fetchWeather, 600000); // 10 min
+    fetchAll();
+    const interval = setInterval(fetchAll, 600000);
     return () => clearInterval(interval);
-  }, [city, apiKey]);
+  }, [citiesKey, apiKey]);
 
-  return weather;
+  return weatherList;
 }
