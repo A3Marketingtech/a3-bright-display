@@ -51,6 +51,29 @@ export function ManagementPanel({
     setMediaName("");
   }, [url, mediaName, mediaType, onAddMedia]);
 
+  const compressImage = useCallback((file: File, maxWidth = 1280, quality = 0.7): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let w = img.width;
+        let h = img.height;
+        if (w > maxWidth) {
+          h = (h * maxWidth) / w;
+          w = maxWidth;
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject(new Error("Canvas not supported"));
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  }, []);
+
   const handleFileUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -59,18 +82,27 @@ export function ManagementPanel({
       setUploading(true);
       setUploadProgress(0);
 
-      // Simulate progress
       const progressInterval = setInterval(() => {
         setUploadProgress((p) => Math.min(p + 10, 90));
       }, 200);
 
-      const reader = new FileReader();
-      reader.onload = async () => {
+      try {
+        const isVideo = file.type.startsWith("video/");
+        let dataUrl: string;
+
+        if (isVideo) {
+          dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+        } else {
+          dataUrl = await compressImage(file);
+        }
+
         clearInterval(progressInterval);
         setUploadProgress(100);
-
-        const dataUrl = reader.result as string;
-        const isVideo = file.type.startsWith("video/");
 
         await onAddMedia({
           name: file.name,
@@ -79,13 +111,14 @@ export function ManagementPanel({
           source: "local",
           duration: 10,
         });
-
+      } catch (err) {
+        console.error("Upload failed:", err);
+      } finally {
         setUploading(false);
         setUploadProgress(0);
-      };
-      reader.readAsDataURL(file);
+      }
     },
-    [onAddMedia]
+    [onAddMedia, compressImage]
   );
 
   const handleTestWeather = async () => {
