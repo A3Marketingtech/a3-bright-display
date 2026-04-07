@@ -1,17 +1,16 @@
 import type { NewsItem } from "@/lib/types";
 
-const GNEWS_BASE_URL = "https://gnews.io/api/v4/top-headlines?lang=pt&country=br";
 const CORS_PROXY_URL = "https://api.allorigins.win/raw?url=";
 
 function buildGNewsUrl(apiKey: string, max: number) {
   const params = new URLSearchParams({
-    lang: "pt",
-    country: "br",
+    lang: "en",
+    country: "us",
     max: String(max),
     apikey: apiKey,
   });
 
-  return `${GNEWS_BASE_URL}&${params.toString()}`;
+  return `https://gnews.io/api/v4/top-headlines?${params.toString()}`;
 }
 
 export async function fetchTopHeadlines(apiKey: string, max = 10): Promise<NewsItem[]> {
