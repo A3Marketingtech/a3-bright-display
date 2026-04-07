@@ -13,6 +13,7 @@ import type { MediaItem, AppSettings, SyncStatus } from "@/lib/types";
 
 const DEFAULT_SETTINGS: AppSettings = {
   city: "São Paulo",
+  cities: ["São Paulo"],
   weatherApiKey: "",
   newsApiKey: "",
   driveFolderId: "1WqYCtbsj2UPmb8Tlkpe0ubkxwDtgN8wf",
