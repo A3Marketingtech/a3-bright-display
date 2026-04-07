@@ -21,7 +21,7 @@ const Index = () => {
     saveSettings,
   } = useFirestore();
 
-  const weather = useWeather(settings.city, settings.weatherApiKey);
+  const weatherList = useWeather(settings.cities?.length ? settings.cities : [settings.city], settings.weatherApiKey);
   const news = useNews(settings.newsApiKey);
 
   const [panelOpen, setPanelOpen] = useState(false);
@@ -53,7 +53,7 @@ const Index = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <WeatherWidget weather={weather} />
+          <WeatherWidget weatherList={weatherList} />
           <Clock />
           <button
             onClick={handleManageClick}
