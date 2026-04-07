@@ -1,6 +1,10 @@
 import type { NewsItem } from "@/lib/types";
 
-const CORS_PROXY_URL = "https://api.allorigins.win/raw?url=";
+const CORS_PROXIES = [
+  (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+];
 
 function buildGNewsUrl(apiKey: string, max: number) {
   const params = new URLSearchParams({
@@ -17,18 +21,24 @@ export async function fetchTopHeadlines(apiKey: string, max = 10): Promise<NewsI
   if (!apiKey) return [];
 
   const targetUrl = buildGNewsUrl(apiKey, max);
-  const response = await fetch(`${CORS_PROXY_URL}${encodeURIComponent(targetUrl)}`);
 
-  if (!response.ok) {
-    throw new Error(`GNews request failed with status ${response.status}`);
+  for (const proxyFn of CORS_PROXIES) {
+    try {
+      const response = await fetch(proxyFn(targetUrl));
+      if (!response.ok) continue;
+
+      const data = await response.json();
+      const articles = Array.isArray(data?.articles) ? data.articles : [];
+
+      return articles.map((article: any) => ({
+        title: article.title,
+        source: article.source?.name ?? "Unknown",
+        publishedAt: article.publishedAt,
+      }));
+    } catch {
+      continue;
+    }
   }
 
-  const data = await response.json();
-  const articles = Array.isArray(data?.articles) ? data.articles : [];
-
-  return articles.map((article: any) => ({
-    title: article.title,
-    source: article.source?.name ?? "Desconhecido",
-    publishedAt: article.publishedAt,
-  }));
+  throw new Error("All CORS proxies failed for GNews API");
 }
