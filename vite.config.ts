@@ -16,12 +16,6 @@ export default defineConfig(({ mode }) => ({
   build: {
     target: ['es2015', 'chrome58', 'safari11'],
     cssTarget: ['chrome58', 'safari11'],
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: mode === 'production',
-      },
-    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
