@@ -303,7 +303,7 @@ export function ManagementPanel({
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*,video/*"
+                      accept="image/*"
                       onChange={handleFileUpload}
                       className="hidden"
                     />
