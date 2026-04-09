@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: '/a3-bright-display/',
+  base: process.env.GITHUB_ACTIONS ? '/a3-bright-display/' : '/',
   server: {
     host: "::",
     port: 8080,
