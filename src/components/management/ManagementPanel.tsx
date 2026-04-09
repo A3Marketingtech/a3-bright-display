@@ -210,11 +210,20 @@ export function ManagementPanel({
     { id: "settings", label: "Configurações" },
   ];
 
+  const [savedCategoryKey, setSavedCategoryKey] = useState<string | null>(null);
+
   const toggleMediaCategory = useCallback(async (itemId: string, catId: string, currentCats: string[]) => {
     const newCats = currentCats.includes(catId)
       ? currentCats.filter((c) => c !== catId)
       : [...currentCats, catId];
-    await updateDoc(doc(db, "media", itemId), { categories: newCats });
+    try {
+      await updateDoc(doc(db, "media", itemId), { categories: newCats });
+      const key = `${itemId}-${catId}`;
+      setSavedCategoryKey(key);
+      setTimeout(() => setSavedCategoryKey((prev) => (prev === key ? null : prev)), 1200);
+    } catch (err) {
+      console.error("Erro ao salvar categoria:", err);
+    }
   }, []);
 
   return (
@@ -425,6 +434,9 @@ export function ManagementPanel({
                                 }`}
                               >
                                 {cat.name}
+                                {savedCategoryKey === `${item.id}-${cat.id}` && (
+                                  <span className="ml-1 text-[9px]">✓</span>
+                                )}
                               </button>
                             );
                           })}
