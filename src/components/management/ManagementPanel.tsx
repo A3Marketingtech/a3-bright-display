@@ -2,6 +2,8 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { MediaItem, AppSettings, SyncStatus } from "@/lib/types";
 import { fetchTopHeadlines } from "@/lib/gnews";
+import { storage } from "@/lib/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 interface ManagementPanelProps {
   open: boolean;
@@ -111,17 +113,21 @@ export function ManagementPanel({
 
       try {
         const isVideo = file.type.startsWith("video/");
-        let dataUrl: string;
+        let fileUrl: string;
 
         if (isVideo) {
-          dataUrl = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          });
+          // Upload video to Firebase Storage
+          const storageRef = ref(storage, `media/${Date.now()}_${file.name}`);
+          await uploadBytes(storageRef, file);
+          fileUrl = await getDownloadURL(storageRef);
         } else {
-          dataUrl = await compressImage(file);
+          // Compress image and upload to Firebase Storage
+          const compressedDataUrl = await compressImage(file);
+          const response = await fetch(compressedDataUrl);
+          const blob = await response.blob();
+          const storageRef = ref(storage, `media/${Date.now()}_${file.name}`);
+          await uploadBytes(storageRef, blob);
+          fileUrl = await getDownloadURL(storageRef);
         }
 
         clearInterval(progressInterval);
@@ -129,7 +135,7 @@ export function ManagementPanel({
 
         await onAddMedia({
           name: file.name,
-          url: dataUrl,
+          url: fileUrl,
           type: isVideo ? "video" : "image",
           source: "local",
           duration: 10,
