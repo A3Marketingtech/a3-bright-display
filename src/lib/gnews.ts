@@ -24,11 +24,17 @@ export async function fetchTopHeadlines(apiKey: string, max = 10): Promise<NewsI
   const targetUrl = buildGNewsUrl(apiKey, max);
 
   for (const proxyFn of CORS_PROXIES) {
+    const url = proxyFn(targetUrl);
     try {
-      const response = await fetch(proxyFn(targetUrl));
-      if (!response.ok) continue;
+      console.log("[GNews] Trying:", url.substring(0, 80));
+      const response = await fetch(url);
+      if (!response.ok) {
+        console.warn("[GNews] HTTP", response.status, response.statusText);
+        continue;
+      }
 
       const data = await response.json();
+      console.log("[GNews] Response keys:", Object.keys(data));
       const articles = Array.isArray(data?.articles) ? data.articles : [];
 
       return articles.map((article: any) => ({
@@ -36,7 +42,8 @@ export async function fetchTopHeadlines(apiKey: string, max = 10): Promise<NewsI
         source: article.source?.name ?? "Unknown",
         publishedAt: article.publishedAt,
       }));
-    } catch {
+    } catch (err) {
+      console.warn("[GNews] Proxy failed:", (err as Error).message);
       continue;
     }
   }
