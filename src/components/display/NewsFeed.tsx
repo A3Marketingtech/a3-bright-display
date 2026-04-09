@@ -13,9 +13,10 @@ function timeAgo(dateStr: string): string {
 
 interface NewsFeedProps {
   news: NewsItem[];
+  emptyMessage?: string;
 }
 
-export function NewsFeed({ news }: NewsFeedProps) {
+export function NewsFeed({ news, emptyMessage = "Sem notícias disponíveis" }: NewsFeedProps) {
   var containerRef = useRef<HTMLDivElement>(null);
   var [scrollY, setScrollY] = useState(0);
 
@@ -46,8 +47,8 @@ export function NewsFeed({ news }: NewsFeedProps) {
 
   if (!news.length) {
     return (
-      <div className="flex items-center justify-center h-full text-muted-foreground text-[clamp(0.6rem,0.7vw,0.85rem)]">
-        Configurar API de notícias
+      <div className="flex items-center justify-center h-full text-center text-muted-foreground text-[clamp(0.6rem,0.7vw,0.85rem)]">
+        {emptyMessage}
       </div>
     );
   }
