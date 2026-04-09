@@ -410,6 +410,25 @@ export function ManagementPanel({
                             {item.source}
                           </span>
                         </div>
+                        {/* Category tags */}
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {categories.map((cat) => {
+                            const active = (item.categories || []).includes(cat.id);
+                            return (
+                              <button
+                                key={cat.id}
+                                onClick={() => toggleMediaCategory(item.id, cat.id, item.categories || [])}
+                                className={`text-[10px] font-display px-1.5 py-0.5 rounded border transition-colors ${
+                                  active
+                                    ? "bg-neon/20 text-neon border-neon/40"
+                                    : "border-border text-muted-foreground hover:text-foreground"
+                                }`}
+                              >
+                                {cat.name}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                       {item.type === "image" && (
                         <input
@@ -434,6 +453,8 @@ export function ManagementPanel({
                   ))}
                 </div>
               )}
+
+              {tab === "targetboard" && <TargetboardTab />}
 
               {tab === "settings" && (
                 <div className="space-y-4">
