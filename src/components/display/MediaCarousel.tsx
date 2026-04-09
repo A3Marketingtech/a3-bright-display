@@ -141,7 +141,7 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
               ref={videoRef}
               key={`${currentItem.id}-${videoSourceIndex}`}
               src={currentVideoUrl}
-              className="max-w-full max-h-full object-contain"
+              className="w-full h-full object-cover"
               autoPlay
               muted
               playsInline
