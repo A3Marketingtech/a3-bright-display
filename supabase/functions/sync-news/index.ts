@@ -102,6 +102,19 @@ Deno.serve(async (req) => {
       if (!error) inserted++;
     }
 
+    // Cleanup: keep only the 100 most recent articles
+    const MAX_ARTICLES = 100;
+    const { data: oldRows } = await supabase
+      .from("news_cache")
+      .select("id")
+      .order("published_at", { ascending: false })
+      .range(MAX_ARTICLES, MAX_ARTICLES + 999);
+
+    if (oldRows && oldRows.length > 0) {
+      const idsToDelete = oldRows.map((r: { id: string }) => r.id);
+      await supabase.from("news_cache").delete().in("id", idsToDelete);
+    }
+
     await supabase.from("news_fetch_log").insert({
       status: "success",
       articles_count: inserted,
