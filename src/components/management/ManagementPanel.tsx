@@ -2,8 +2,6 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { MediaItem, AppSettings, SyncStatus } from "@/lib/types";
 import { fetchTopHeadlines } from "@/lib/gnews";
-import { storage } from "@/lib/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 interface ManagementPanelProps {
   open: boolean;
@@ -104,6 +102,14 @@ export function ManagementPanel({
       const file = e.target.files?.[0];
       if (!file) return;
 
+      const isVideo = file.type.startsWith("video/");
+
+      if (isVideo) {
+        alert("Vídeos devem ser adicionados via URL (Google Drive ou link direto).");
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+
       setUploading(true);
       setUploadProgress(0);
 
@@ -112,31 +118,15 @@ export function ManagementPanel({
       }, 200);
 
       try {
-        const isVideo = file.type.startsWith("video/");
-        let fileUrl: string;
-
-        if (isVideo) {
-          // Upload video to Firebase Storage
-          const storageRef = ref(storage, `media/${Date.now()}_${file.name}`);
-          await uploadBytes(storageRef, file);
-          fileUrl = await getDownloadURL(storageRef);
-        } else {
-          // Compress image and upload to Firebase Storage
-          const compressedDataUrl = await compressImage(file);
-          const response = await fetch(compressedDataUrl);
-          const blob = await response.blob();
-          const storageRef = ref(storage, `media/${Date.now()}_${file.name}`);
-          await uploadBytes(storageRef, blob);
-          fileUrl = await getDownloadURL(storageRef);
-        }
+        const compressedDataUrl = await compressImage(file);
 
         clearInterval(progressInterval);
         setUploadProgress(100);
 
         await onAddMedia({
           name: file.name,
-          url: fileUrl,
-          type: isVideo ? "video" : "image",
+          url: compressedDataUrl,
+          type: "image",
           source: "local",
           duration: 10,
         });
@@ -145,6 +135,7 @@ export function ManagementPanel({
       } finally {
         setUploading(false);
         setUploadProgress(0);
+        if (fileInputRef.current) fileInputRef.current.value = "";
       }
     },
     [onAddMedia, compressImage]
@@ -312,7 +303,7 @@ export function ManagementPanel({
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*,video/*"
+                      accept="image/*"
                       onChange={handleFileUpload}
                       className="hidden"
                     />
