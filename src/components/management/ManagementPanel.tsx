@@ -418,10 +418,10 @@ export function ManagementPanel({
                               <button
                                 key={cat.id}
                                 onClick={() => toggleMediaCategory(item.id, cat.id, item.categories || [])}
-                                className={`text-[10px] font-display px-1.5 py-0.5 rounded border transition-colors ${
+                                className={`text-[10px] font-display font-semibold px-2 py-1 rounded border transition-all ${
                                   active
-                                    ? "bg-neon/20 text-neon border-neon/40"
-                                    : "border-border text-muted-foreground hover:text-foreground"
+                                    ? "bg-neon text-primary-foreground border-neon shadow-[0_0_6px_hsl(var(--neon)/0.4)]"
+                                    : "bg-secondary border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
                                 }`}
                               >
                                 {cat.name}
