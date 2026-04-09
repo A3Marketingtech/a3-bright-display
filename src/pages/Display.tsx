@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import vanIcon from "@/assets/van-icon.png";
-import { StatusIndicator } from "@/components/display/StatusIndicator";
+
 import { WeatherWidget } from "@/components/display/WeatherWidget";
 import { Clock } from "@/components/display/Clock";
 import { NewsFeed } from "@/components/display/NewsFeed";
@@ -68,7 +68,7 @@ const Display = () => {
       >
         {/* Left: status + weather carousel */}
         <div className="flex items-center gap-[1.5vw]">
-          <StatusIndicator status={syncStatus} />
+          
           {weatherList.length > 0 && (
             <WeatherWidget weatherList={weatherList} />
           )}
