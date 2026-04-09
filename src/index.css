@@ -89,14 +89,23 @@
     50% { opacity: 0.4; }
   }
   .animate-pulse-dot {
-    animation: pulse-dot 2s ease-in-out infinite;
+    -webkit-animation: pulse-dot 3s ease-in-out infinite;
+    animation: pulse-dot 3s ease-in-out infinite;
   }
+}
 
-  @keyframes slide-up-news {
-    from { transform: translateY(100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  .animate-slide-up {
-    animation: slide-up-news 0.5s ease-out;
+/* Smart TV compatibility: vendor prefixes */
+* {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+/* Reduce motion for low-power devices */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    -webkit-animation-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    -webkit-transition-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }
