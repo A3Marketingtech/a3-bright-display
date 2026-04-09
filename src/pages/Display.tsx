@@ -17,7 +17,7 @@ const Display = () => {
   const { currentDriver, loginError, login, logout } = useDriverAuth();
 
   const weatherList = useWeather(settings.cities?.length ? settings.cities : [settings.city], settings.weatherApiKey);
-  const { news, error: newsError } = useNews(settings.newsApiKey);
+  const { news, error: newsError } = useNews();
 
   const [logoutPrompt, setLogoutPrompt] = useState(false);
   const [logoutPassword, setLogoutPassword] = useState("");

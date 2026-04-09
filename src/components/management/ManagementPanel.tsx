@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { MediaItem, AppSettings, SyncStatus, VehicleCategory } from "@/lib/types";
-import { fetchTopHeadlines } from "@/lib/gnews";
+import { NewsStatusPanel } from "./NewsStatusPanel";
 import { normalizeMediaUrl, resolveMediaSource } from "@/lib/media";
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
@@ -20,7 +20,7 @@ interface ManagementPanelProps {
   onSaveSettings: (settings: AppSettings) => Promise<void>;
 }
 
-type Tab = "add" | "media" | "settings" | "targetboard";
+type Tab = "add" | "media" | "settings" | "targetboard" | "news";
 
 export function ManagementPanel({
   open,
@@ -189,30 +189,13 @@ export function ManagementPanel({
     setTimeout(() => setTestResult(null), 5000);
   };
 
-  const handleTestNews = async () => {
-    if (!localSettings.newsApiKey?.trim()) {
-      setTestResult("❌ Configure a API de notícias");
-      setTimeout(() => setTestResult(null), 5000);
-      return;
-    }
-
-    try {
-      const articles = await fetchTopHeadlines(localSettings.newsApiKey, 1);
-      if (articles.length > 0) {
-        setTestResult(`✅ Notícias: "${articles[0].title.substring(0, 50)}..."`);
-      } else {
-        setTestResult("❌ Sem artigos disponíveis");
-      }
-    } catch (err) {
-      setTestResult(`❌ ${err instanceof Error ? err.message : "Erro ao testar notícias"}`);
-    }
-    setTimeout(() => setTestResult(null), 5000);
-  };
+  // News test removed - now handled via backend sync
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "add", label: "Adicionar" },
     { id: "media", label: "Mídias" },
     { id: "targetboard", label: "TARGETBOARD" },
+    { id: "news", label: "Notícias" },
     { id: "settings", label: "Configurações" },
   ];
 
@@ -474,6 +457,8 @@ export function ManagementPanel({
 
               {tab === "targetboard" && <TargetboardTab />}
 
+              {tab === "news" && <NewsStatusPanel />}
+
               {tab === "settings" && (
                 <div className="space-y-4">
                   {/* Cities Section */}
@@ -520,7 +505,6 @@ export function ManagementPanel({
 
                   {[
                     { label: "API Key OpenWeatherMap", key: "weatherApiKey" as const, placeholder: "Sua chave da API" },
-                    { label: "API Key GNews", key: "newsApiKey" as const, placeholder: "Sua chave da API" },
                     { label: "ID Pasta Google Drive", key: "driveFolderId" as const, placeholder: "ID da pasta" },
                     { label: "Senha do Painel", key: "password" as const, placeholder: "Mínimo 4 caracteres" },
                   ].map((field) => (
@@ -546,20 +530,12 @@ export function ManagementPanel({
                     </div>
                   )}
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleTestWeather}
-                      className="flex-1 border border-border text-foreground font-display font-medium py-2 rounded-lg text-xs hover:border-neon/30 transition-colors"
-                    >
-                      Testar Clima
-                    </button>
-                    <button
-                      onClick={handleTestNews}
-                      className="flex-1 border border-border text-foreground font-display font-medium py-2 rounded-lg text-xs hover:border-neon/30 transition-colors"
-                    >
-                      Testar Notícias
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleTestWeather}
+                    className="w-full border border-border text-foreground font-display font-medium py-2 rounded-lg text-xs hover:border-neon/30 transition-colors"
+                  >
+                    Testar Clima
+                  </button>
 
                   <button
                     onClick={async () => {

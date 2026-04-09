@@ -1,48 +1,56 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { NewsItem } from "@/lib/types";
-import { fetchTopHeadlines } from "@/lib/gnews";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UseNewsResult {
   news: NewsItem[];
   error: string | null;
+  loading: boolean;
 }
 
-export function useNews(apiKey: string): UseNewsResult {
+export function useNews(): UseNewsResult {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchFromCache = useCallback(async () => {
+    try {
+      const { data, error: dbError } = await supabase
+        .from("news_cache")
+        .select("title, source, published_at")
+        .order("published_at", { ascending: false })
+        .limit(20);
+
+      if (dbError) throw dbError;
+
+      if (!data || data.length === 0) {
+        setNews([]);
+        setError("As notícias estão temporariamente indisponíveis. Tente novamente mais tarde.");
+      } else {
+        setNews(
+          data.map((row) => ({
+            title: row.title,
+            source: row.source,
+            publishedAt: row.published_at ?? new Date().toISOString(),
+          }))
+        );
+        setError(null);
+      }
+    } catch {
+      // Keep existing news on error, only show message if empty
+      if (news.length === 0) {
+        setError("As notícias estão temporariamente indisponíveis. Tente novamente mais tarde.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    if (!apiKey) {
-      setNews([]);
-      setError("Configurar API de notícias");
-      return;
-    }
+    fetchFromCache();
+    const interval = setInterval(fetchFromCache, 60000); // refresh from cache every minute
+    return () => clearInterval(interval);
+  }, [fetchFromCache]);
 
-    let active = true;
-
-    const fetchNews = async () => {
-      try {
-        const articles = await fetchTopHeadlines(apiKey, 10);
-        if (!active) return;
-
-        setNews(articles);
-        setError(articles.length ? null : "Sem artigos disponíveis");
-      } catch (e) {
-        if (!active) return;
-
-        setNews([]);
-        setError(e instanceof Error ? e.message : "Falha ao carregar notícias");
-      }
-    };
-
-    fetchNews();
-    const interval = setInterval(fetchNews, 300000);
-
-    return () => {
-      active = false;
-      clearInterval(interval);
-    };
-  }, [apiKey]);
-
-  return { news, error };
+  return { news, error, loading };
 }
