@@ -62,7 +62,7 @@ const Index = () => {
 
   // Show login if no driver
   if (!currentDriver) {
-    return <DriverLogin onLogin={login} error={loginError} />;
+    return <DriverLogin onLogin={login} onManage={handleManageClick} error={loginError} />;
   }
 
   return (
