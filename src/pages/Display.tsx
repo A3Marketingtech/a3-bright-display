@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { StatusIndicator } from "@/components/display/StatusIndicator";
 import { WeatherWidget } from "@/components/display/WeatherWidget";
 import { Clock } from "@/components/display/Clock";
@@ -9,8 +9,10 @@ import { useFirestore } from "@/hooks/useFirestore";
 import { useDriverAuth } from "@/hooks/useDriverAuth";
 import { useWeather } from "@/hooks/useWeather";
 import { useNews } from "@/hooks/useNews";
+import { detectTV } from "@/lib/tvDetection";
 
 const Display = () => {
+  const tvCaps = useMemo(function () { return detectTV(); }, []);
   const { mediaItems, settings, syncStatus } = useFirestore();
   const { currentDriver, loginError, login, logout } = useDriverAuth();
 
@@ -62,7 +64,7 @@ const Display = () => {
         <div
           style={{ width: "calc(100vw - 280px)", height: "calc(100vh - 60px)", minHeight: 0, minWidth: 0, flexShrink: 0 }}
         >
-          <MediaCarousel items={filteredMedia} />
+          <MediaCarousel items={filteredMedia} tvCapabilities={tvCaps} />
         </div>
 
         <div
@@ -84,7 +86,8 @@ const Display = () => {
       {/* Logout modal */}
       {logoutPrompt && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: "rgba(10,10,10,0.85)" }}
           onClick={() => setLogoutPrompt(false)}
         >
           <div className="bg-card border border-border rounded-2xl p-[2vw] w-[clamp(280px,22vw,400px)]" onClick={(e) => e.stopPropagation()}>

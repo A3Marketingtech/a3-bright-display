@@ -1,31 +1,13 @@
 /**
  * Polyfills for Smart TV browsers (Samsung Tizen, LG WebOS)
- * These browsers often run older Chromium/WebKit engines
+ * Only safe, non-invasive polyfills that won't conflict with React
  */
-
-// Core-js polyfills for missing ES features
-import 'core-js/stable/array/from';
-import 'core-js/stable/array/find';
-import 'core-js/stable/array/find-index';
-import 'core-js/stable/array/includes';
-import 'core-js/stable/object/assign';
-import 'core-js/stable/object/entries';
-import 'core-js/stable/object/values';
-import 'core-js/stable/promise';
-import 'core-js/stable/string/includes';
-import 'core-js/stable/string/starts-with';
-import 'core-js/stable/string/ends-with';
-import 'core-js/stable/set';
-import 'core-js/stable/map';
-import 'core-js/stable/symbol';
-import 'core-js/stable/url';
-import 'core-js/stable/url-search-params';
 
 // crypto.randomUUID polyfill (missing in many TV browsers)
 if (typeof crypto !== 'undefined' && !crypto.randomUUID) {
   (crypto as any).randomUUID = function randomUUID(): string {
-    return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, (c: string) => {
-      const n = Number(c);
+    return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, function (c: string) {
+      var n = Number(c);
       return (n ^ ((typeof crypto !== 'undefined' && crypto.getRandomValues
         ? crypto.getRandomValues(new Uint8Array(1))[0]
         : Math.floor(Math.random() * 256)) & (15 >> (n / 4)))).toString(16);
@@ -67,5 +49,3 @@ if (typeof window !== 'undefined' && !('ResizeObserver' in window)) {
     disconnect() {}
   };
 }
-
-console.log('[A3 Display] Polyfills loaded for Smart TV compatibility');

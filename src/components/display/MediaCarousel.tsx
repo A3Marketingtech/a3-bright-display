@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { MediaItem } from "@/lib/types";
 import { getMediaPlaybackUrls } from "@/lib/media";
+import { type TVCapabilities, getOptimizedImageUrl } from "@/lib/tvDetection";
 
 interface MediaCarouselProps {
   items: MediaItem[];
+  tvCapabilities?: TVCapabilities;
 }
 
 function getGoogleDriveEmbedUrl(rawUrl: string): string | null {
@@ -24,7 +26,7 @@ function getGoogleDriveEmbedUrl(rawUrl: string): string | null {
   }
 }
 
-export function MediaCarousel({ items }: MediaCarouselProps) {
+export function MediaCarousel({ items, tvCapabilities }: MediaCarouselProps) {
   const [current, setCurrent] = useState(0);
   const [progress, setProgress] = useState(0);
   const [videoSourceIndex, setVideoSourceIndex] = useState(0);
@@ -130,7 +132,7 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
       >
         {currentItem.type === "image" ? (
           <img
-            src={currentItem.url}
+            src={tvCapabilities ? getOptimizedImageUrl(currentItem.url, tvCapabilities) : currentItem.url}
             alt={currentItem.name}
             className="h-full w-full"
             style={{ objectFit: "contain", objectPosition: "center" }}
