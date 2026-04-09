@@ -112,7 +112,7 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
   }
 
   return (
-    <div className="relative h-full w-full rounded-xl overflow-hidden bg-black border border-border">
+    <div className="relative h-full w-full overflow-hidden bg-black">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentItem.id}
@@ -120,13 +120,13 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
-          className="absolute inset-0 flex items-center justify-center"
+          className="absolute inset-0"
         >
           {currentItem.type === "image" ? (
             <img
               src={currentItem.url}
               alt={currentItem.name}
-              className="max-w-full max-h-full object-contain"
+              className="w-full h-full object-cover"
             />
           ) : isDriveVideo ? (
             <iframe

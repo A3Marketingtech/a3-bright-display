@@ -59,15 +59,15 @@ const Display = () => {
         </div>
       </header>
 
-      {/* Main area — fills remaining height, no scroll */}
-      <main className="flex-1 flex min-h-0 p-[1vw] gap-[1vw]">
-        {/* Carousel — fills all available space */}
+      {/* Main area — fills remaining height, no scroll, no padding */}
+      <main className="flex-1 flex min-h-0">
+        {/* Carousel — fills all available space, no gaps */}
         <div className="flex-1 min-w-0 min-h-0">
           <MediaCarousel items={filteredMedia} />
         </div>
 
-        {/* News sidebar — proportional width with min/max */}
-        <div className="flex-shrink-0 flex flex-col min-w-[240px] max-w-[320px]" style={{ width: 'clamp(240px, 18vw, 320px)' }}>
+        {/* News sidebar */}
+        <div className="flex-shrink-0 flex flex-col p-[1vw] pl-0" style={{ width: 'clamp(240px, 18vw, 320px)' }}>
           <div className="flex items-center gap-[0.4vw] mb-[0.8vh]">
             <span className="w-[0.4vw] h-[0.4vw] min-w-[6px] min-h-[6px] rounded-full bg-neon animate-pulse-dot" />
             <span className="text-[clamp(0.6rem,0.7vw,0.85rem)] font-display font-semibold text-muted-foreground tracking-wide uppercase">
