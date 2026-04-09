@@ -127,7 +127,7 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
             <img
               src={currentItem.url}
               alt={currentItem.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           ) : isDriveVideo ? (
             <iframe
@@ -142,7 +142,7 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
               ref={videoRef}
               key={`${currentItem.id}-${videoSourceIndex}`}
               src={currentVideoUrl}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
               autoPlay
               muted
               playsInline
