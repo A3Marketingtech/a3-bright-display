@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { MediaItem } from "@/lib/types";
 import { getMediaPlaybackUrls } from "@/lib/media";
+import { type TVCapabilities, getOptimizedImageUrl } from "@/lib/tvDetection";
 
 interface MediaCarouselProps {
   items: MediaItem[];
+  tvCapabilities?: TVCapabilities;
 }
 
 function getGoogleDriveEmbedUrl(rawUrl: string): string | null {
