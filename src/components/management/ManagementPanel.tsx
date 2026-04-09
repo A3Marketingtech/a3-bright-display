@@ -2,6 +2,8 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { MediaItem, AppSettings, SyncStatus } from "@/lib/types";
 import { fetchTopHeadlines } from "@/lib/gnews";
+import { storage } from "@/lib/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 interface ManagementPanelProps {
   open: boolean;
