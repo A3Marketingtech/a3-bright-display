@@ -17,7 +17,7 @@ const Display = () => {
   const { currentDriver, loginError, login, logout } = useDriverAuth();
 
   const weatherList = useWeather(settings.cities?.length ? settings.cities : [settings.city], settings.weatherApiKey);
-  const news = useNews(settings.newsApiKey);
+  const { news, error: newsError } = useNews(settings.newsApiKey);
 
   const [logoutPrompt, setLogoutPrompt] = useState(false);
   const [logoutPassword, setLogoutPassword] = useState("");
@@ -78,7 +78,7 @@ const Display = () => {
             </span>
           </div>
           <div className="flex-1 min-h-0">
-            <NewsFeed news={news} />
+            <NewsFeed news={news} emptyMessage={newsError ?? "Sem notícias disponíveis"} />
           </div>
         </div>
       </main>

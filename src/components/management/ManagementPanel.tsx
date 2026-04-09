@@ -190,15 +190,21 @@ export function ManagementPanel({
   };
 
   const handleTestNews = async () => {
+    if (!localSettings.newsApiKey?.trim()) {
+      setTestResult("❌ Configure a API de notícias");
+      setTimeout(() => setTestResult(null), 5000);
+      return;
+    }
+
     try {
       const articles = await fetchTopHeadlines(localSettings.newsApiKey, 1);
       if (articles.length > 0) {
         setTestResult(`✅ Notícias: "${articles[0].title.substring(0, 50)}..."`);
       } else {
-        setTestResult("❌ Erro: Sem artigos");
+        setTestResult("❌ Sem artigos disponíveis");
       }
-    } catch {
-      setTestResult("❌ Erro de conexão");
+    } catch (err) {
+      setTestResult(`❌ ${err instanceof Error ? err.message : "Erro ao testar notícias"}`);
     }
     setTimeout(() => setTestResult(null), 5000);
   };
