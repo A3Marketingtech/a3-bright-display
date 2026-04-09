@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, enableNetwork, disableNetwork } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -14,3 +14,23 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+/**
+ * Ensure Firestore network is enabled with a timeout.
+ * On Smart TVs (especially LG WebOS), network setup can hang.
+ * This resolves after timeout even if network isn't ready,
+ * so the app never blocks indefinitely.
+ */
+export function ensureFirestoreReady(timeoutMs: number = 10000): Promise<void> {
+  return Promise.race([
+    enableNetwork(db).catch(function () {
+      console.warn('[A3] Firestore enableNetwork failed, continuing offline');
+    }),
+    new Promise<void>(function (resolve) {
+      setTimeout(function () {
+        console.warn('[A3] Firestore ready timeout after ' + timeoutMs + 'ms, proceeding anyway');
+        resolve();
+      }, timeoutMs);
+    }),
+  ]);
+}
