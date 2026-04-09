@@ -142,7 +142,7 @@ export function TargetboardTab() {
                 <div>
                   <p className="text-sm font-body font-medium">{d.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {d.vehicle} • {cat?.name || "Sem categoria"} • Login: {d.login}
+                    {d.vehicle} • {cat?.name || "Sem categoria"} • Login: {d.login} • Senha: {d.password}
                   </p>
                 </div>
                 <button onClick={() => removeDriver(d.id)} className="text-muted-foreground hover:text-destructive transition-colors text-sm">✕</button>
