@@ -69,7 +69,7 @@ export function ManagementPanel({
 
     await onAddMedia({
       name: trimmedName || `${mediaType === "video" ? "Vídeo" : "Imagem"} via URL`,
-      label: trimmedName || undefined,
+      label: trimmedName || "",
       url: normalizedUrl,
       type: mediaType,
       source: resolveMediaSource(url),
