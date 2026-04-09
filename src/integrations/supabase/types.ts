@@ -14,7 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      news_cache: {
+        Row: {
+          content_hash: string
+          description: string | null
+          id: string
+          image_url: string | null
+          imported_at: string
+          published_at: string | null
+          source: string
+          title: string
+          url: string | null
+        }
+        Insert: {
+          content_hash: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          imported_at?: string
+          published_at?: string | null
+          source: string
+          title: string
+          url?: string | null
+        }
+        Update: {
+          content_hash?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          imported_at?: string
+          published_at?: string | null
+          source?: string
+          title?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      news_fetch_log: {
+        Row: {
+          articles_count: number
+          error_message: string | null
+          fetched_at: string
+          id: string
+          provider: string
+          status: string
+        }
+        Insert: {
+          articles_count?: number
+          error_message?: string | null
+          fetched_at?: string
+          id?: string
+          provider?: string
+          status?: string
+        }
+        Update: {
+          articles_count?: number
+          error_message?: string | null
+          fetched_at?: string
+          id?: string
+          provider?: string
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
