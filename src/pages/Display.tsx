@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import vanIcon from "@/assets/van-icon.png";
-import { StatusIndicator } from "@/components/display/StatusIndicator";
+
 import { WeatherWidget } from "@/components/display/WeatherWidget";
 import { Clock } from "@/components/display/Clock";
 import { NewsFeed } from "@/components/display/NewsFeed";
