@@ -57,7 +57,7 @@ const Display = () => {
     return <DriverLogin onLogin={login} error={loginError} />;
   }
 
-  const currentWeather = weatherList.length > 0 ? weatherList[0] : null;
+  
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-background">
