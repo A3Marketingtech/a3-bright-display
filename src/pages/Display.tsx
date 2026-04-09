@@ -37,9 +37,8 @@ const Display = () => {
   }
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-background overflow-hidden">
-      {/* Header — fixed height scales with viewport */}
-      <header className="flex items-center justify-between px-[1.5vw] py-[0.8vh] border-b border-border flex-shrink-0">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-background">
+      <header className="flex h-[60px] flex-shrink-0 items-center justify-between border-b border-border px-[1.5vw]">
         <div className="flex items-center gap-[1vw]">
           <h1 className="font-display font-bold text-[clamp(0.75rem,1.2vw,1.5rem)] tracking-tight whitespace-nowrap">
             A<sup className="text-neon text-[0.6em]">3</sup> Marketing Display
@@ -59,15 +58,18 @@ const Display = () => {
         </div>
       </header>
 
-      {/* Main area — fills remaining height, no scroll, no padding */}
-      <main className="flex-1 flex min-h-0">
-        {/* Carousel — fills all available space, no gaps */}
-        <div className="flex-1 min-w-0 min-h-0">
+      <main className="flex min-h-0 w-screen overflow-hidden" style={{ height: "calc(100vh - 60px)" }}>
+        <div
+          className="min-h-0 min-w-0 flex-shrink-0"
+          style={{ width: "calc(100vw - 280px)", height: "calc(100vh - 60px)" }}
+        >
           <MediaCarousel items={filteredMedia} />
         </div>
 
-        {/* News sidebar */}
-        <div className="flex-shrink-0 flex flex-col p-[1vw] pl-0" style={{ width: 'clamp(240px, 18vw, 320px)' }}>
+        <div
+          className="flex h-full w-[280px] flex-shrink-0 flex-col overflow-hidden p-[1vw] pl-0"
+          style={{ height: "calc(100vh - 60px)" }}
+        >
           <div className="flex items-center gap-[0.4vw] mb-[0.8vh]">
             <span className="w-[0.4vw] h-[0.4vw] min-w-[6px] min-h-[6px] rounded-full bg-neon animate-pulse-dot" />
             <span className="text-[clamp(0.6rem,0.7vw,0.85rem)] font-display font-semibold text-muted-foreground tracking-wide uppercase">
