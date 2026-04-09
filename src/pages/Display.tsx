@@ -111,7 +111,7 @@ const Display = () => {
         className="flex items-center justify-center"
         style={{ height: "6vh", flexShrink: 0 }}
       >
-        <p className="text-[clamp(0.8rem,1.1vw,1.4rem)] font-display font-medium text-muted-foreground tracking-wide">
+        <p className="text-[clamp(1.2rem,2vw,2.5rem)] font-display font-semibold text-foreground tracking-wide">
           Welcome — Enjoy Your Ride 🚘
         </p>
       </div>
