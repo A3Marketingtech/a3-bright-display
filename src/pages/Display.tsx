@@ -57,7 +57,7 @@ const Display = () => {
     return <DriverLogin onLogin={login} error={loginError} />;
   }
 
-  const currentWeather = weatherList.length > 0 ? weatherList[0] : null;
+  
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-background">
@@ -66,20 +66,12 @@ const Display = () => {
         className="flex items-center justify-between border-b border-border/30 px-[2vw]"
         style={{ height: "8vh", flexShrink: 0 }}
       >
-        {/* Left: weather temp + city */}
+        {/* Left: status + weather carousel */}
         <div className="flex items-center gap-[1.5vw]">
-          {currentWeather && (
-            <>
-              <span className="text-[clamp(0.9rem,1.2vw,1.5rem)]">{currentWeather.icon}</span>
-              <span className="text-[clamp(0.8rem,1vw,1.3rem)] font-display font-bold text-foreground">
-                {currentWeather.temp}°C
-              </span>
-              <span className="text-[clamp(0.65rem,0.8vw,1rem)] text-muted-foreground">
-                {currentWeather.city}
-              </span>
-            </>
-          )}
           <StatusIndicator status={syncStatus} />
+          {weatherList.length > 0 && (
+            <WeatherWidget weatherList={weatherList} />
+          )}
         </div>
 
         {/* Center: clock */}
@@ -87,16 +79,8 @@ const Display = () => {
           <Clock />
         </div>
 
-        {/* Right: weather condition + logout */}
+        {/* Right: logout */}
         <div className="flex items-center gap-[1.5vw]">
-          {currentWeather && (
-            <span className="text-[clamp(0.65rem,0.8vw,1rem)] text-muted-foreground capitalize">
-              {currentWeather.description}
-            </span>
-          )}
-          {weatherList.length > 1 && (
-            <WeatherWidget weatherList={weatherList.slice(1)} />
-          )}
           <button
             onClick={() => { setLogoutPrompt(true); setLogoutPassword(""); }}
             className="text-muted-foreground/20 hover:text-muted-foreground text-[clamp(0.7rem,1vw,1.2rem)] transition-colors"

@@ -23,10 +23,10 @@ export function WeatherWidget({ weatherList }: WeatherWidgetProps) {
 
   if (!weatherList.length) return null;
 
-  var weather = weatherList[index];
+  var weather = weatherList[index % weatherList.length];
 
   return (
-    <div className="flex items-center gap-[0.5vw] bg-card/80 rounded-full px-[1vw] py-[0.4vh] border border-border overflow-hidden min-w-[clamp(160px,13vw,240px)]">
+    <div className="flex items-center gap-[0.5vw] bg-card/80 rounded-full px-[1vw] py-[0.4vh] border border-border overflow-hidden min-w-[clamp(200px,16vw,300px)]">
       <div
         className="flex items-center gap-[0.5vw]"
         style={{
@@ -36,9 +36,9 @@ export function WeatherWidget({ weatherList }: WeatherWidgetProps) {
       >
         <span className="text-[clamp(0.9rem,1.1vw,1.5rem)]">{weather.icon}</span>
         <span className="text-[clamp(0.7rem,0.85vw,1.1rem)] font-display font-bold">{weather.temp}°C</span>
-        <span className="text-[clamp(0.55rem,0.7vw,0.85rem)] text-muted-foreground capitalize">{weather.description}</span>
-        <span className="text-[clamp(0.55rem,0.7vw,0.85rem)] text-muted-foreground">•</span>
         <span className="text-[clamp(0.55rem,0.7vw,0.85rem)] text-muted-foreground">{weather.city}</span>
+        <span className="text-[clamp(0.55rem,0.7vw,0.85rem)] text-muted-foreground">•</span>
+        <span className="text-[clamp(0.55rem,0.7vw,0.85rem)] text-muted-foreground capitalize">{weather.description}</span>
       </div>
     </div>
   );
