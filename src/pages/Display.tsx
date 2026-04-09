@@ -35,6 +35,7 @@ const Display = () => {
 
   const weatherList = useWeather(settings.cities?.length ? settings.cities : [settings.city], settings.weatherApiKey);
   const { news, error: newsError, lastUpdated } = useNews();
+  const timeAgoLabel = useTimeAgoLabel(lastUpdated);
 
   const [logoutPrompt, setLogoutPrompt] = useState(false);
   const [logoutPassword, setLogoutPassword] = useState("");
@@ -95,9 +96,9 @@ const Display = () => {
                 Notícias
               </span>
             </div>
-            {lastUpdated && (
+            {timeAgoLabel && (
               <span className="text-[clamp(0.45rem,0.55vw,0.65rem)] text-muted-foreground/60 font-body">
-                <LastUpdatedLabel date={lastUpdated} />
+                {timeAgoLabel}
               </span>
             )}
           </div>
