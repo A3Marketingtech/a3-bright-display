@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { StatusIndicator } from "@/components/display/StatusIndicator";
 import { WeatherWidget } from "@/components/display/WeatherWidget";
 import { Clock } from "@/components/display/Clock";
@@ -11,13 +11,31 @@ import { useWeather } from "@/hooks/useWeather";
 import { useNews } from "@/hooks/useNews";
 import { detectTV } from "@/lib/tvDetection";
 
+function useTimeAgoLabel(date: Date | null): string {
+  const [label, setLabel] = useState("");
+  useEffect(() => {
+    if (!date) return;
+    const update = () => {
+      const mins = Math.floor((Date.now() - date.getTime()) / 60000);
+      if (mins < 1) setLabel("Atualizado agora");
+      else if (mins < 60) setLabel(`Atualizado há ${mins}min`);
+      else setLabel(`Atualizado há ${Math.floor(mins / 60)}h`);
+    };
+    update();
+    const id = setInterval(update, 30000);
+    return () => clearInterval(id);
+  }, [date]);
+  return label;
+}
+
 const Display = () => {
   const tvCaps = useMemo(function () { return detectTV(); }, []);
   const { mediaItems, settings, syncStatus } = useFirestore();
   const { currentDriver, loginError, login, logout } = useDriverAuth();
 
   const weatherList = useWeather(settings.cities?.length ? settings.cities : [settings.city], settings.weatherApiKey);
-  const { news, error: newsError } = useNews();
+  const { news, error: newsError, lastUpdated } = useNews();
+  const timeAgoLabel = useTimeAgoLabel(lastUpdated);
 
   const [logoutPrompt, setLogoutPrompt] = useState(false);
   const [logoutPassword, setLogoutPassword] = useState("");
@@ -71,11 +89,18 @@ const Display = () => {
           className="flex flex-col overflow-hidden"
           style={{ width: "280px", height: "calc(100vh - 60px)", flexShrink: 0, padding: "1vw", paddingLeft: 0 }}
         >
-          <div className="flex items-center gap-[0.4vw] mb-[0.8vh]">
-            <span className="w-[0.4vw] h-[0.4vw] min-w-[6px] min-h-[6px] rounded-full bg-neon animate-pulse-dot" />
-            <span className="text-[clamp(0.6rem,0.7vw,0.85rem)] font-display font-semibold text-muted-foreground tracking-wide uppercase">
-              Notícias
-            </span>
+          <div className="flex items-center justify-between mb-[0.8vh]">
+            <div className="flex items-center gap-[0.4vw]">
+              <span className="w-[0.4vw] h-[0.4vw] min-w-[6px] min-h-[6px] rounded-full bg-neon animate-pulse-dot" />
+              <span className="text-[clamp(0.6rem,0.7vw,0.85rem)] font-display font-semibold text-muted-foreground tracking-wide uppercase">
+                Notícias
+              </span>
+            </div>
+            {timeAgoLabel && (
+              <span className="text-[clamp(0.45rem,0.55vw,0.65rem)] text-muted-foreground/60 font-body">
+                {timeAgoLabel}
+              </span>
+            )}
           </div>
           <div className="flex-1 min-h-0">
             <NewsFeed news={news} emptyMessage={newsError ?? "Sem notícias disponíveis"} />

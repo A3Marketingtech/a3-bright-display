@@ -6,12 +6,14 @@ interface UseNewsResult {
   news: NewsItem[];
   error: string | null;
   loading: boolean;
+  lastUpdated: Date | null;
 }
 
 export function useNews(): UseNewsResult {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchFromCache = useCallback(async () => {
     try {
@@ -35,6 +37,7 @@ export function useNews(): UseNewsResult {
           }))
         );
         setError(null);
+        setLastUpdated(new Date());
       }
     } catch {
       // Keep existing news on error, only show message if empty
@@ -52,5 +55,5 @@ export function useNews(): UseNewsResult {
     return () => clearInterval(interval);
   }, [fetchFromCache]);
 
-  return { news, error, loading };
+  return { news, error, loading, lastUpdated };
 }
