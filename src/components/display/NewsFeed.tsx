@@ -45,7 +45,7 @@ export function NewsFeed({ news }: NewsFeedProps) {
 
   if (!news.length) {
     return (
-      <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
+      <div className="flex items-center justify-center h-full text-muted-foreground text-[clamp(0.6rem,0.7vw,0.85rem)]">
         Configurar API de notícias
       </div>
     );
@@ -54,22 +54,22 @@ export function NewsFeed({ news }: NewsFeedProps) {
   return (
     <div
       ref={containerRef}
-      className="h-full overflow-hidden space-y-3 pr-1"
+      className="h-full overflow-hidden space-y-[0.8vh] pr-1"
       style={{ scrollBehavior: "auto" }}
     >
       {[...news, ...news].map((item, i) => (
         <div
           key={`${item.title}-${i}`}
-          className="p-3 bg-card rounded-lg border border-border hover:border-neon/20 transition-colors"
+          className="p-[0.8vw] bg-card rounded-lg border border-border hover:border-neon/20 transition-colors"
         >
-          <p className="text-xs font-body leading-relaxed line-clamp-3 text-foreground/90">
+          <p className="text-[clamp(0.6rem,0.72vw,0.85rem)] font-body leading-relaxed line-clamp-3 text-foreground/90">
             {item.title}
           </p>
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-[10px] text-neon font-display font-medium truncate max-w-[60%]">
+          <div className="flex items-center justify-between mt-[0.5vh]">
+            <span className="text-[clamp(0.5rem,0.6vw,0.7rem)] text-neon font-display font-medium truncate max-w-[60%]">
               {item.source}
             </span>
-            <span className="text-[10px] text-muted-foreground">
+            <span className="text-[clamp(0.5rem,0.6vw,0.7rem)] text-muted-foreground">
               {timeAgo(item.publishedAt)}
             </span>
           </div>

@@ -60,7 +60,6 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
     setProgress(0);
   }, [items.length]);
 
-  // Auto-advance for images and Drive videos (iframe has no ended event)
   useEffect(() => {
     if (!currentItem) return;
     if (currentItem.type === "video" && !isDriveVideo) return;
@@ -101,10 +100,10 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
     return (
       <div className="flex items-center justify-center h-full bg-card rounded-xl border border-border">
         <div className="text-center">
-          <p className="text-2xl font-display font-bold text-muted-foreground mb-2">
+          <p className="text-[clamp(1rem,2vw,2rem)] font-display font-bold text-muted-foreground mb-[0.5vh]">
             A<sup className="text-neon">3</sup> Marketing Display
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-[clamp(0.65rem,0.8vw,1rem)] text-muted-foreground">
             Adicione mídias pelo painel de gestão
           </p>
         </div>
@@ -113,7 +112,7 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
   }
 
   return (
-    <div className="relative h-full w-full rounded-xl overflow-hidden bg-card border border-border">
+    <div className="relative h-full w-full rounded-xl overflow-hidden bg-black border border-border">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentItem.id}
@@ -121,13 +120,13 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
-          className="absolute inset-0"
+          className="absolute inset-0 flex items-center justify-center"
         >
           {currentItem.type === "image" ? (
             <img
               src={currentItem.url}
               alt={currentItem.name}
-              className="w-full h-full object-contain"
+              className="max-w-full max-h-full object-contain"
             />
           ) : isDriveVideo ? (
             <iframe
@@ -142,7 +141,7 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
               ref={videoRef}
               key={`${currentItem.id}-${videoSourceIndex}`}
               src={currentVideoUrl}
-              className="w-full h-full object-contain"
+              className="max-w-full max-h-full object-contain"
               autoPlay
               muted
               playsInline
@@ -156,12 +155,12 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
       </AnimatePresence>
 
       {currentItem.label && (
-        <div className="absolute bottom-14 left-4 bg-background/70 backdrop-blur-sm rounded-md px-3 py-1">
-          <span className="text-xs font-body text-foreground/80">{currentItem.label}</span>
+        <div className="absolute bottom-[4vh] left-[1vw] bg-background/70 backdrop-blur-sm rounded-md px-[0.8vw] py-[0.3vh]">
+          <span className="text-[clamp(0.55rem,0.7vw,0.85rem)] font-body text-foreground/80">{currentItem.label}</span>
         </div>
       )}
 
-      <div className="absolute bottom-8 left-4 right-4 h-1 bg-foreground/10 rounded-full overflow-hidden">
+      <div className="absolute bottom-[2.5vh] left-[1vw] right-[1vw] h-[0.3vh] min-h-[2px] bg-foreground/10 rounded-full overflow-hidden">
         <motion.div
           className="h-full bg-neon rounded-full"
           style={{ width: `${progress}%` }}
@@ -169,7 +168,7 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
         />
       </div>
 
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+      <div className="absolute bottom-[0.8vh] left-1/2 -translate-x-1/2 flex gap-[0.4vw]">
         {items.map((_, i) => (
           <button
             key={i}
@@ -177,8 +176,8 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
               setCurrent(i);
               setProgress(0);
             }}
-            className={`w-2 h-2 rounded-full transition-all ${
-              i === current ? "bg-neon w-5" : "bg-foreground/30 hover:bg-foreground/50"
+            className={`h-[0.5vh] min-h-[4px] rounded-full transition-all ${
+              i === current ? "bg-neon w-[1.5vw] min-w-[16px]" : "bg-foreground/30 hover:bg-foreground/50 w-[0.5vw] min-w-[6px]"
             }`}
           />
         ))}
