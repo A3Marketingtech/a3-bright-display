@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { MediaItem } from "@/lib/types";
+import { getMediaPlaybackUrls } from "@/lib/media";
 
 interface MediaCarouselProps {
   items: MediaItem[];
@@ -9,6 +10,7 @@ interface MediaCarouselProps {
 export function MediaCarousel({ items }: MediaCarouselProps) {
   const [current, setCurrent] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [videoSourceIndex, setVideoSourceIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const progressRef = useRef<NodeJS.Timeout | null>(null);
@@ -24,6 +26,12 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
 
   const safeIndex = items.length > 0 ? Math.min(current, items.length - 1) : 0;
   const currentItem = items[safeIndex];
+  const videoSources = currentItem?.type === "video" ? getMediaPlaybackUrls(currentItem.url, "video") : [];
+  const currentVideoUrl = videoSources[Math.min(videoSourceIndex, Math.max(videoSources.length - 1, 0))];
+
+  useEffect(() => {
+    setVideoSourceIndex(0);
+  }, [currentItem?.id, currentItem?.url]);
 
   const goToNext = useCallback(() => {
     if (items.length <= 1) return;
@@ -63,6 +71,10 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
     }
   }, []);
 
+  const handleVideoError = useCallback(() => {
+    setVideoSourceIndex((prev) => (prev < videoSources.length - 1 ? prev + 1 : prev));
+  }, [videoSources.length]);
+
   if (!items.length) {
     return (
       <div className="flex items-center justify-center h-full bg-card rounded-xl border border-border">
@@ -98,12 +110,15 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
           ) : (
             <video
               ref={videoRef}
-              src={currentItem.url}
+              key={`${currentItem.id}-${videoSourceIndex}`}
+              src={currentVideoUrl}
               className="w-full h-full object-cover"
               autoPlay
               muted
               playsInline
+              loop={items.length === 1}
               onEnded={handleVideoEnd}
+              onError={handleVideoError}
               onTimeUpdate={handleVideoTimeUpdate}
             />
           )}
