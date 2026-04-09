@@ -64,6 +64,7 @@ export function ManagementPanel({
     if (!url) return;
     await onAddMedia({
       name: mediaName || "Mídia sem nome",
+      label: mediaName || undefined,
       url,
       type: mediaType,
       source: "url",
