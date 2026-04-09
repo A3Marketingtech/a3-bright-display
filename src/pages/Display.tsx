@@ -113,7 +113,7 @@ const Display = () => {
         style={{ height: "6vh", flexShrink: 0 }}
       >
         <p className="text-[clamp(1.2rem,2vw,2.5rem)] font-display font-semibold text-foreground tracking-wide">
-          Welcome — Enjoy Your Ride <img src={vanIcon} alt="van" className="inline-block h-[1.2em] w-auto align-middle ml-[0.3em]" />
+          Welcome — Enjoy Your Ride <img src={vanIcon} alt="van" className="inline-block h-[2em] w-auto align-middle ml-[0.3em]" />
         </p>
       </div>
 
