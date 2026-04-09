@@ -21,7 +21,7 @@ export function useWeather(cities: string[], apiKey: string) {
       for (const city of cities) {
         try {
           const res = await fetch(
-            `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&lang=pt_br&appid=${apiKey}`
+            `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&lang=en&appid=${apiKey}`
           );
           const data = await res.json();
           if (data.main) {
