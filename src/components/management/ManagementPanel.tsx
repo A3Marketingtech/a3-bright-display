@@ -434,6 +434,9 @@ export function ManagementPanel({
                                 }`}
                               >
                                 {cat.name}
+                                {savedCategoryKey === `${item.id}-${cat.id}` && (
+                                  <span className="ml-1 text-[9px]">✓</span>
+                                )}
                               </button>
                             );
                           })}
