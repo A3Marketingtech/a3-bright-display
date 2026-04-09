@@ -60,9 +60,45 @@ const Index = () => {
     ? mediaItems.filter((item) => (item.categories || []).includes(currentDriver.categoryId))
     : [];
 
-  // Show login if no driver
+  // Show login if no driver (but keep password prompt & panel available)
   if (!currentDriver) {
-    return <DriverLogin onLogin={login} error={loginError} />;
+    return (
+      <>
+        <DriverLogin onLogin={login} onManage={handleManageClick} error={loginError} />
+        {showPasswordPrompt && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+            onClick={() => setShowPasswordPrompt(false)}
+          >
+            <div className="bg-card border border-border rounded-2xl p-6 w-80" onClick={(e) => e.stopPropagation()}>
+              <h3 className="font-display font-bold text-sm mb-4">Senha do Painel</h3>
+              <input
+                type="password"
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handlePasswordSubmit()}
+                placeholder="Digite a senha"
+                className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-sm font-body focus:outline-none focus:border-neon/50 transition-colors mb-4"
+                autoFocus
+              />
+              <button onClick={handlePasswordSubmit} className="w-full bg-neon text-primary-foreground font-display font-semibold py-2.5 rounded-lg text-sm hover:opacity-90 transition-opacity">Entrar</button>
+            </div>
+          </div>
+        )}
+        <ManagementPanel
+          open={panelOpen}
+          onClose={() => setPanelOpen(false)}
+          mediaItems={mediaItems}
+          settings={settings}
+          syncStatus={syncStatus}
+          onAddMedia={addMedia}
+          onRemoveMedia={removeMedia}
+          onReorderMedia={reorderMedia}
+          onUpdateDuration={updateMediaDuration}
+          onSaveSettings={saveSettings}
+        />
+      </>
+    );
   }
 
   return (
