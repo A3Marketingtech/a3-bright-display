@@ -1,6 +1,7 @@
 export interface MediaItem {
   id: string;
   name: string;
+  label?: string; // user-defined display label
   url: string;
   type: "image" | "video";
   source: "local" | "url" | "drive";

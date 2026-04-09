@@ -64,6 +64,7 @@ export function ManagementPanel({
     if (!url) return;
     await onAddMedia({
       name: mediaName || "Mídia sem nome",
+      label: mediaName || undefined,
       url,
       type: mediaType,
       source: "url",
@@ -321,6 +322,9 @@ export function ManagementPanel({
                         Imagens e vídeos
                       </span>
                     </button>
+                    <p className="text-[10px] text-muted-foreground bg-secondary/50 border border-border rounded-lg px-3 py-2">
+                      💡 Tamanho ideal: 1280×720px (16:9) • JPG • máx 500KB • mantenha elementos importantes a 80px das bordas.
+                    </p>
                     {uploading && (
                       <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
                         <div
