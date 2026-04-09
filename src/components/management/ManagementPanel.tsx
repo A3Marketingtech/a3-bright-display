@@ -1,11 +1,12 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { MediaItem, AppSettings, SyncStatus } from "@/lib/types";
+import type { MediaItem, AppSettings, SyncStatus, VehicleCategory } from "@/lib/types";
 import { fetchTopHeadlines } from "@/lib/gnews";
 import { normalizeMediaUrl, resolveMediaSource } from "@/lib/media";
-import { storage } from "@/lib/firebase";
+import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-
+import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
+import { TargetboardTab } from "./TargetboardTab";
 interface ManagementPanelProps {
   open: boolean;
   onClose: () => void;
@@ -19,7 +20,7 @@ interface ManagementPanelProps {
   onSaveSettings: (settings: AppSettings) => Promise<void>;
 }
 
-type Tab = "add" | "media" | "settings";
+type Tab = "add" | "media" | "settings" | "targetboard";
 
 export function ManagementPanel({
   open,
@@ -41,6 +42,16 @@ export function ManagementPanel({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [testResult, setTestResult] = useState<string | null>(null);
   const [cityInput, setCityInput] = useState("");
+  const [categories, setCategories] = useState<VehicleCategory[]>([]);
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "categories"), (snap) => {
+      const list: VehicleCategory[] = [];
+      snap.forEach((d) => list.push({ id: d.id, ...d.data() } as VehicleCategory));
+      setCategories(list);
+    });
+    return unsub;
+  }, []);
 
   useEffect(() => {
     setLocalSettings(settings);
@@ -195,8 +206,16 @@ export function ManagementPanel({
   const tabs: { id: Tab; label: string }[] = [
     { id: "add", label: "Adicionar" },
     { id: "media", label: "Mídias" },
+    { id: "targetboard", label: "TARGETBOARD" },
     { id: "settings", label: "Configurações" },
   ];
+
+  const toggleMediaCategory = useCallback(async (itemId: string, catId: string, currentCats: string[]) => {
+    const newCats = currentCats.includes(catId)
+      ? currentCats.filter((c) => c !== catId)
+      : [...currentCats, catId];
+    await updateDoc(doc(db, "media", itemId), { categories: newCats });
+  }, []);
 
   return (
     <AnimatePresence>
@@ -391,6 +410,25 @@ export function ManagementPanel({
                             {item.source}
                           </span>
                         </div>
+                        {/* Category tags */}
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {categories.map((cat) => {
+                            const active = (item.categories || []).includes(cat.id);
+                            return (
+                              <button
+                                key={cat.id}
+                                onClick={() => toggleMediaCategory(item.id, cat.id, item.categories || [])}
+                                className={`text-[10px] font-display px-1.5 py-0.5 rounded border transition-colors ${
+                                  active
+                                    ? "bg-neon/20 text-neon border-neon/40"
+                                    : "border-border text-muted-foreground hover:text-foreground"
+                                }`}
+                              >
+                                {cat.name}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                       {item.type === "image" && (
                         <input
@@ -415,6 +453,8 @@ export function ManagementPanel({
                   ))}
                 </div>
               )}
+
+              {tab === "targetboard" && <TargetboardTab />}
 
               {tab === "settings" && (
                 <div className="space-y-4">
