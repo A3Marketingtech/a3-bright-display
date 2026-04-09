@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { MediaItem, AppSettings, SyncStatus } from "@/lib/types";
 import { fetchTopHeadlines } from "@/lib/gnews";
 import { normalizeMediaUrl, resolveMediaSource } from "@/lib/media";
+import { storage } from "@/lib/firebase";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 interface ManagementPanelProps {
   open: boolean;
@@ -108,9 +110,10 @@ export function ManagementPanel({
       if (!file) return;
 
       const isVideo = file.type.startsWith("video/");
+      const isImage = file.type.startsWith("image/");
 
-      if (isVideo) {
-        alert("Vídeos devem ser adicionados via URL (Google Drive ou link direto).");
+      if (!isVideo && !isImage) {
+        alert("Formato não suportado. Envie imagens ou vídeos.");
         if (fileInputRef.current) fileInputRef.current.value = "";
         return;
       }
@@ -118,32 +121,44 @@ export function ManagementPanel({
       setUploading(true);
       setUploadProgress(0);
 
-      const progressInterval = setInterval(() => {
-        setUploadProgress((p) => Math.min(p + 10, 90));
-      }, 200);
-
       try {
-        const compressedDataUrl = await compressImage(file);
+        const ext = file.name.split(".").pop() || "bin";
+        const fileName = `${Date.now()}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
+        const storageRef = ref(storage, `media/${fileName}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
 
-        clearInterval(progressInterval);
-        setUploadProgress(100);
+        await new Promise<void>((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              const pct = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              setUploadProgress(Math.round(pct));
+            },
+            (error) => reject(error),
+            () => resolve()
+          );
+        });
+
+        const downloadURL = await getDownloadURL(storageRef);
 
         await onAddMedia({
           name: file.name,
-          url: compressedDataUrl,
-          type: "image",
+          label: "",
+          url: downloadURL,
+          type: isVideo ? "video" : "image",
           source: "local",
-          duration: 10,
+          duration: isVideo ? 0 : 10,
         });
       } catch (err) {
         console.error("Upload failed:", err);
+        alert("Erro no upload. Verifique as permissões do Firebase Storage.");
       } finally {
         setUploading(false);
         setUploadProgress(0);
         if (fileInputRef.current) fileInputRef.current.value = "";
       }
     },
-    [onAddMedia, compressImage]
+    [onAddMedia]
   );
 
   const handleTestWeather = async () => {
@@ -308,7 +323,7 @@ export function ManagementPanel({
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*"
+                      accept="image/*,video/*"
                       onChange={handleFileUpload}
                       className="hidden"
                     />
