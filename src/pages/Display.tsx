@@ -68,7 +68,7 @@ const Display = () => {
       >
         {/* Left: status + weather carousel */}
         <div className="flex items-center gap-[1.5vw]">
-          <StatusIndicator status={syncStatus} />
+          
           {weatherList.length > 0 && (
             <WeatherWidget weatherList={weatherList} />
           )}
