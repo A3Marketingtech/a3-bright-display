@@ -86,9 +86,9 @@ export function NewsStatusPanel() {
 
       {/* Last error */}
       {lastStatus === "error" && lastError && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-          <p className="text-[10px] font-display text-red-400 uppercase tracking-wide mb-1">Último erro</p>
-          <p className="text-xs font-body text-red-300">{lastError}</p>
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+          <p className="text-[10px] font-display text-destructive uppercase tracking-wide mb-1">Último erro</p>
+          <p className="text-xs font-body text-destructive/80">{lastError}</p>
           <p className="text-[10px] text-muted-foreground mt-1">
             ⚠️ Modo fallback ativo — exibindo notícias em cache
           </p>
