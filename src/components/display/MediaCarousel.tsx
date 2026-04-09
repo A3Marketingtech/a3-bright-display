@@ -98,7 +98,7 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
 
   if (!items.length) {
     return (
-      <div className="flex items-center justify-center h-full bg-card rounded-xl border border-border">
+      <div className="flex h-full w-full items-center justify-center" style={{ backgroundColor: "hsl(0 0% 0%)" }}>
         <div className="text-center">
           <p className="text-[clamp(1rem,2vw,2rem)] font-display font-bold text-muted-foreground mb-[0.5vh]">
             A<sup className="text-neon">3</sup> Marketing Display
@@ -112,7 +112,7 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
   }
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-black">
+    <div className="relative h-full w-full overflow-hidden" style={{ backgroundColor: "hsl(0 0% 0%)" }}>
       <AnimatePresence mode="wait">
         <motion.div
           key={currentItem.id}
@@ -120,28 +120,30 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
-          className="absolute inset-0"
+          className="absolute inset-0 flex items-center justify-center"
         >
           {currentItem.type === "image" ? (
             <img
               src={currentItem.url}
               alt={currentItem.name}
-              className="w-full h-full object-cover"
+              className="h-full w-full object-contain object-center"
             />
           ) : isDriveVideo ? (
-            <iframe
-              src={`${driveEmbedUrl}?autoplay=1&loop=1&controls=0&modestbranding=1`}
-              className="w-full h-full border-0"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              style={{ pointerEvents: "none" }}
-            />
+            <div className="flex h-full w-full items-center justify-center">
+              <iframe
+                src={`${driveEmbedUrl}?autoplay=1&loop=1&controls=0&modestbranding=1`}
+                className="h-full w-full border-0"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                style={{ pointerEvents: "none" }}
+              />
+            </div>
           ) : (
             <video
               ref={videoRef}
               key={`${currentItem.id}-${videoSourceIndex}`}
               src={currentVideoUrl}
-              className="w-full h-full object-cover"
+              className="h-full w-full object-contain object-center"
               autoPlay
               muted
               playsInline
