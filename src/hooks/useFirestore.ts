@@ -24,32 +24,64 @@ export function useFirestore() {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("online");
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const unsubMedia = onSnapshot(
+    var mediaReady = false;
+    var settingsReady = false;
+
+    function checkReady() {
+      if (mediaReady && settingsReady) setReady(true);
+    }
+
+    // Timeout: if Firestore hasn't responded in 15s, mark ready anyway
+    var timeout = setTimeout(function () {
+      if (!ready) {
+        console.warn('[A3] Firestore snapshot timeout, proceeding with defaults');
+        setReady(true);
+        setSyncStatus("error");
+      }
+    }, 15000);
+
+    var unsubMedia = onSnapshot(
       collection(db, "media"),
-      (snapshot) => {
-        const items: MediaItem[] = [];
-        snapshot.forEach((d) => items.push({ id: d.id, ...d.data() } as MediaItem));
-        items.sort((a, b) => a.order - b.order);
+      function (snapshot) {
+        var items: MediaItem[] = [];
+        snapshot.forEach(function (d) { items.push({ id: d.id, ...d.data() } as MediaItem); });
+        items.sort(function (a, b) { return a.order - b.order; });
         setMediaItems(items);
         setSyncStatus("online");
+        mediaReady = true;
+        checkReady();
       },
-      () => setSyncStatus("error")
+      function (err) {
+        console.error('[A3] Firestore media error:', err.message);
+        setSyncStatus("error");
+        mediaReady = true;
+        checkReady();
+      }
     );
 
-    const unsubSettings = onSnapshot(
+    var unsubSettings = onSnapshot(
       doc(db, "config", "settings"),
-      (snapshot) => {
+      function (snapshot) {
         if (snapshot.exists()) {
           setSettings({ ...DEFAULT_SETTINGS, ...snapshot.data() } as AppSettings);
         }
         setSyncStatus("online");
+        settingsReady = true;
+        checkReady();
       },
-      () => setSyncStatus("error")
+      function (err) {
+        console.error('[A3] Firestore settings error:', err.message);
+        setSyncStatus("error");
+        settingsReady = true;
+        checkReady();
+      }
     );
 
-    return () => {
+    return function () {
+      clearTimeout(timeout);
       unsubMedia();
       unsubSettings();
     };
@@ -57,7 +89,7 @@ export function useFirestore() {
 
   const addMedia = useCallback(async (item: Omit<MediaItem, "id" | "order">) => {
     setSyncStatus("saving");
-    const id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
+    var id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
     await setDoc(doc(db, "media", id), { ...item, order: mediaItems.length });
   }, [mediaItems.length]);
 
@@ -68,8 +100,8 @@ export function useFirestore() {
 
   const reorderMedia = useCallback(async (items: MediaItem[]) => {
     setSyncStatus("saving");
-    const batch = writeBatch(db);
-    items.forEach((item, i) => {
+    var batch = writeBatch(db);
+    items.forEach(function (item, i) {
       batch.update(doc(db, "media", item.id), { order: i });
     });
     await batch.commit();
@@ -89,6 +121,7 @@ export function useFirestore() {
     mediaItems,
     settings,
     syncStatus,
+    ready,
     addMedia,
     removeMedia,
     reorderMedia,
