@@ -1,12 +1,13 @@
 export interface MediaItem {
   id: string;
   name: string;
-  label?: string; // user-defined display label
+  label?: string;
   url: string;
   type: "image" | "video";
   source: "local" | "url" | "drive";
-  duration: number; // seconds, for images only
+  duration: number;
   order: number;
+  categories?: string[]; // array of category IDs
 }
 
 export interface AppSettings {
@@ -16,6 +17,22 @@ export interface AppSettings {
   newsApiKey: string;
   driveFolderId: string;
   password: string;
+}
+
+export interface Driver {
+  id: string;
+  name: string;
+  login: string;
+  password: string;
+  vehicle: string;
+  vin: string;
+  categoryId: string;
+}
+
+export interface VehicleCategory {
+  id: string;
+  name: string;
+  description: string;
 }
 
 export interface WeatherData {
