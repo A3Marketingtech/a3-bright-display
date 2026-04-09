@@ -2,10 +2,11 @@ import { useState } from "react";
 
 interface DriverLoginProps {
   onLogin: (login: string, password: string) => Promise<boolean>;
+  onManage: () => void;
   error: string;
 }
 
-export function DriverLogin({ onLogin, error }: DriverLoginProps) {
+export function DriverLogin({ onLogin, onManage, error }: DriverLoginProps) {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -60,6 +61,13 @@ export function DriverLogin({ onLogin, error }: DriverLoginProps) {
             {loading ? "Entrando..." : "Entrar"}
           </button>
         </div>
+
+        <button
+          onClick={onManage}
+          className="mt-8 text-[10px] text-muted-foreground/40 hover:text-muted-foreground transition-colors font-display w-full text-center"
+        >
+          Gerenciar Painel
+        </button>
       </div>
     </div>
   );
