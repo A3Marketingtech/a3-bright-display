@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { MediaItem, AppSettings, SyncStatus } from "@/lib/types";
 import { fetchTopHeadlines } from "@/lib/gnews";
+import { normalizeMediaUrl, resolveMediaSource } from "@/lib/media";
 
 interface ManagementPanelProps {
   open: boolean;
@@ -62,12 +63,16 @@ export function ManagementPanel({
 
   const handleAddUrl = useCallback(async () => {
     if (!url) return;
+
+    const trimmedName = mediaName.trim();
+    const normalizedUrl = normalizeMediaUrl(url, mediaType);
+
     await onAddMedia({
-      name: mediaName || "Mídia sem nome",
-      label: mediaName || undefined,
-      url,
+      name: trimmedName || `${mediaType === "video" ? "Vídeo" : "Imagem"} via URL`,
+      label: trimmedName || undefined,
+      url: normalizedUrl,
       type: mediaType,
-      source: "url",
+      source: resolveMediaSource(url),
       duration: 10,
     });
     setUrl("");
