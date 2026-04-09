@@ -13,7 +13,17 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const progressRef = useRef<NodeJS.Timeout | null>(null);
 
-  const currentItem = items[current];
+  // Clamp current index when items change (BUG 2 fix)
+  useEffect(() => {
+    if (items.length === 0) {
+      setCurrent(0);
+    } else if (current >= items.length) {
+      setCurrent(items.length - 1);
+    }
+  }, [items.length, current]);
+
+  const safeIndex = items.length > 0 ? Math.min(current, items.length - 1) : 0;
+  const currentItem = items[safeIndex];
 
   const goToNext = useCallback(() => {
     if (items.length <= 1) return;
@@ -100,10 +110,12 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
         </motion.div>
       </AnimatePresence>
 
-      {/* Media label */}
-      <div className="absolute bottom-14 left-4 bg-background/70 backdrop-blur-sm rounded-md px-3 py-1">
-        <span className="text-xs font-body text-foreground/80">{currentItem.name}</span>
-      </div>
+      {/* Media label - only show user-defined label */}
+      {currentItem.label && (
+        <div className="absolute bottom-14 left-4 bg-background/70 backdrop-blur-sm rounded-md px-3 py-1">
+          <span className="text-xs font-body text-foreground/80">{currentItem.label}</span>
+        </div>
+      )}
 
       {/* Progress bar */}
       <div className="absolute bottom-8 left-4 right-4 h-1 bg-foreground/10 rounded-full overflow-hidden">
