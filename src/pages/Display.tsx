@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
+import vanIcon from "@/assets/van-icon.png";
 import { StatusIndicator } from "@/components/display/StatusIndicator";
 import { WeatherWidget } from "@/components/display/WeatherWidget";
 import { Clock } from "@/components/display/Clock";
@@ -112,7 +113,7 @@ const Display = () => {
         style={{ height: "6vh", flexShrink: 0 }}
       >
         <p className="text-[clamp(1.2rem,2vw,2.5rem)] font-display font-semibold text-foreground tracking-wide">
-          Welcome — Enjoy Your Ride 🚘
+          Welcome — Enjoy Your Ride <img src={vanIcon} alt="van" className="inline-block h-[1.2em] w-auto align-middle ml-[0.3em]" />
         </p>
       </div>
 
