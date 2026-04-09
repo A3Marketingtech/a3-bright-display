@@ -57,7 +57,7 @@ export function useFirestore() {
 
   const addMedia = useCallback(async (item: Omit<MediaItem, "id" | "order">) => {
     setSyncStatus("saving");
-    const id = crypto.randomUUID();
+    const id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
     await setDoc(doc(db, "media", id), { ...item, order: mediaItems.length });
   }, [mediaItems.length]);
 

@@ -12,7 +12,7 @@ const labels: Record<SyncStatus, string> = {
 
 export function StatusIndicator({ status }: StatusIndicatorProps) {
   return (
-    <div className="flex items-center gap-[0.4vw] bg-card/80 backdrop-blur-sm rounded-full px-[0.8vw] py-[0.4vh] border border-border">
+    <div className="flex items-center gap-[0.4vw] bg-card/80 rounded-full px-[0.8vw] py-[0.4vh] border border-border">
       <span
         className={`w-[0.5vw] h-[0.5vw] min-w-[6px] min-h-[6px] rounded-full ${
           status === "online"

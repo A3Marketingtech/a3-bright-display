@@ -38,7 +38,7 @@ const Display = () => {
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-background">
-      <header className="flex h-[60px] flex-shrink-0 items-center justify-between border-b border-border px-[1.5vw]">
+      <header className="flex items-center justify-between border-b border-border" style={{ height: "60px", flexShrink: 0, padding: "0 1.5vw" }}>
         <div className="flex items-center gap-[1vw]">
           <h1 className="font-display font-bold text-[clamp(0.75rem,1.2vw,1.5rem)] tracking-tight whitespace-nowrap">
             A<sup className="text-neon text-[0.6em]">3</sup> Marketing Display
@@ -58,17 +58,16 @@ const Display = () => {
         </div>
       </header>
 
-      <main className="flex min-h-0 w-screen overflow-hidden" style={{ height: "calc(100vh - 60px)" }}>
+      <main className="flex w-screen overflow-hidden" style={{ height: "calc(100vh - 60px)", minHeight: 0 }}>
         <div
-          className="min-h-0 min-w-0 flex-shrink-0"
-          style={{ width: "calc(100vw - 280px)", height: "calc(100vh - 60px)" }}
+          style={{ width: "calc(100vw - 280px)", height: "calc(100vh - 60px)", minHeight: 0, minWidth: 0, flexShrink: 0 }}
         >
           <MediaCarousel items={filteredMedia} />
         </div>
 
         <div
-          className="flex h-full w-[280px] flex-shrink-0 flex-col overflow-hidden p-[1vw] pl-0"
-          style={{ height: "calc(100vh - 60px)" }}
+          className="flex flex-col overflow-hidden"
+          style={{ width: "280px", height: "calc(100vh - 60px)", flexShrink: 0, padding: "1vw", paddingLeft: 0 }}
         >
           <div className="flex items-center gap-[0.4vw] mb-[0.8vh]">
             <span className="w-[0.4vw] h-[0.4vw] min-w-[6px] min-h-[6px] rounded-full bg-neon animate-pulse-dot" />
