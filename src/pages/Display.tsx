@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { StatusIndicator } from "@/components/display/StatusIndicator";
 import { WeatherWidget } from "@/components/display/WeatherWidget";
 import { Clock } from "@/components/display/Clock";
@@ -10,6 +10,23 @@ import { useDriverAuth } from "@/hooks/useDriverAuth";
 import { useWeather } from "@/hooks/useWeather";
 import { useNews } from "@/hooks/useNews";
 import { detectTV } from "@/lib/tvDetection";
+
+function useTimeAgoLabel(date: Date | null): string {
+  const [label, setLabel] = useState("");
+  useEffect(() => {
+    if (!date) return;
+    const update = () => {
+      const mins = Math.floor((Date.now() - date.getTime()) / 60000);
+      if (mins < 1) setLabel("Atualizado agora");
+      else if (mins < 60) setLabel(`Atualizado há ${mins}min`);
+      else setLabel(`Atualizado há ${Math.floor(mins / 60)}h`);
+    };
+    update();
+    const id = setInterval(update, 30000);
+    return () => clearInterval(id);
+  }, [date]);
+  return label;
+}
 
 const Display = () => {
   const tvCaps = useMemo(function () { return detectTV(); }, []);
