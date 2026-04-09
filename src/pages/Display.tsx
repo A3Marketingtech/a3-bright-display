@@ -56,21 +56,49 @@ const Display = () => {
     return <DriverLogin onLogin={login} error={loginError} />;
   }
 
+  const currentWeather = weatherList.length > 0 ? weatherList[0] : null;
+
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-background">
-      <header className="flex items-center justify-between border-b border-border" style={{ height: "60px", flexShrink: 0, padding: "0 1.5vw" }}>
-        <div className="flex items-center gap-[1vw]">
-          <h1 className="font-display font-bold text-[clamp(0.75rem,1.2vw,1.5rem)] tracking-tight whitespace-nowrap">
-            A<sup className="text-neon text-[0.6em]">3</sup> Marketing Display
-          </h1>
+      {/* ── 1. TOP BAR (~8%) ── */}
+      <header
+        className="flex items-center justify-between border-b border-border/30 px-[2vw]"
+        style={{ height: "8vh", flexShrink: 0 }}
+      >
+        {/* Left: weather temp + city */}
+        <div className="flex items-center gap-[1.5vw]">
+          {currentWeather && (
+            <>
+              <span className="text-[clamp(0.9rem,1.2vw,1.5rem)]">{currentWeather.icon}</span>
+              <span className="text-[clamp(0.8rem,1vw,1.3rem)] font-display font-bold text-foreground">
+                {currentWeather.temp}°C
+              </span>
+              <span className="text-[clamp(0.65rem,0.8vw,1rem)] text-muted-foreground">
+                {currentWeather.city}
+              </span>
+            </>
+          )}
           <StatusIndicator status={syncStatus} />
         </div>
-        <div className="flex items-center gap-[0.8vw]">
-          <WeatherWidget weatherList={weatherList} />
+
+        {/* Center: clock */}
+        <div className="absolute left-1/2 -translate-x-1/2">
           <Clock />
+        </div>
+
+        {/* Right: weather condition + logout */}
+        <div className="flex items-center gap-[1.5vw]">
+          {currentWeather && (
+            <span className="text-[clamp(0.65rem,0.8vw,1rem)] text-muted-foreground capitalize">
+              {currentWeather.description}
+            </span>
+          )}
+          {weatherList.length > 1 && (
+            <WeatherWidget weatherList={weatherList.slice(1)} />
+          )}
           <button
             onClick={() => { setLogoutPrompt(true); setLogoutPassword(""); }}
-            className="text-muted-foreground/30 hover:text-muted-foreground text-[clamp(0.7rem,1vw,1.2rem)] transition-colors"
+            className="text-muted-foreground/20 hover:text-muted-foreground text-[clamp(0.7rem,1vw,1.2rem)] transition-colors"
             title="Logout"
           >
             ⏻
@@ -78,22 +106,39 @@ const Display = () => {
         </div>
       </header>
 
-      <main className="flex w-screen overflow-hidden" style={{ height: "calc(100vh - 60px)", minHeight: 0 }}>
+      {/* ── 2. WELCOME MESSAGE (~6%) ── */}
+      <div
+        className="flex items-center justify-center"
+        style={{ height: "6vh", flexShrink: 0 }}
+      >
+        <p className="text-[clamp(0.8rem,1.1vw,1.4rem)] font-display font-medium text-muted-foreground tracking-wide">
+          Welcome — Enjoy Your Ride 🚘
+        </p>
+      </div>
+
+      {/* ── 3. MAIN CONTENT (~78%) ── */}
+      <main
+        className="flex overflow-hidden"
+        style={{ height: "78vh", minHeight: 0 }}
+      >
+        {/* Left column: Ad / Media — 70% */}
         <div
-          style={{ width: "calc(100vw - 280px)", height: "calc(100vh - 60px)", minHeight: 0, minWidth: 0, flexShrink: 0 }}
+          className="relative overflow-hidden"
+          style={{ width: "70%", height: "100%", minHeight: 0, minWidth: 0, flexShrink: 0 }}
         >
           <MediaCarousel items={filteredMedia} tvCapabilities={tvCaps} />
         </div>
 
+        {/* Right column: News — 30% */}
         <div
           className="flex flex-col overflow-hidden"
-          style={{ width: "280px", height: "calc(100vh - 60px)", flexShrink: 0, padding: "1vw", paddingLeft: 0 }}
+          style={{ width: "30%", height: "100%", flexShrink: 0, padding: "1.2vh 1.2vw" }}
         >
-          <div className="flex items-center justify-between mb-[0.8vh]">
-            <div className="flex items-center gap-[0.4vw]">
-              <span className="w-[0.4vw] h-[0.4vw] min-w-[6px] min-h-[6px] rounded-full bg-neon animate-pulse-dot" />
-              <span className="text-[clamp(0.6rem,0.7vw,0.85rem)] font-display font-semibold text-muted-foreground tracking-wide uppercase">
-                Notícias
+          <div className="flex items-center justify-between mb-[1vh]">
+            <div className="flex items-center gap-[0.5vw]">
+              <span className="text-[clamp(0.7rem,0.85vw,1rem)]">📰</span>
+              <span className="text-[clamp(0.6rem,0.75vw,0.9rem)] font-display font-semibold text-muted-foreground tracking-wide uppercase">
+                Notícias Locais
               </span>
             </div>
             {timeAgoLabel && (
@@ -108,7 +153,17 @@ const Display = () => {
         </div>
       </main>
 
-      {/* Logout modal */}
+      {/* ── 4. FOOTER (~8%) ── */}
+      <footer
+        className="flex items-center justify-center border-t border-border/20"
+        style={{ height: "8vh", flexShrink: 0 }}
+      >
+        <p className="text-[clamp(0.55rem,0.7vw,0.85rem)] text-muted-foreground/60 font-body tracking-wider">
+          Powered by A³ Marketing & Tech
+        </p>
+      </footer>
+
+      {/* Logout modal — unchanged */}
       {logoutPrompt && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"
