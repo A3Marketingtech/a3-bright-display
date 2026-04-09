@@ -17,7 +17,7 @@ const Display = () => {
   const { currentDriver, loginError, login, logout } = useDriverAuth();
 
   const weatherList = useWeather(settings.cities?.length ? settings.cities : [settings.city], settings.weatherApiKey);
-  const { news, error: newsError } = useNews();
+  const { news, error: newsError, lastUpdated } = useNews();
 
   const [logoutPrompt, setLogoutPrompt] = useState(false);
   const [logoutPassword, setLogoutPassword] = useState("");
@@ -71,11 +71,18 @@ const Display = () => {
           className="flex flex-col overflow-hidden"
           style={{ width: "280px", height: "calc(100vh - 60px)", flexShrink: 0, padding: "1vw", paddingLeft: 0 }}
         >
-          <div className="flex items-center gap-[0.4vw] mb-[0.8vh]">
-            <span className="w-[0.4vw] h-[0.4vw] min-w-[6px] min-h-[6px] rounded-full bg-neon animate-pulse-dot" />
-            <span className="text-[clamp(0.6rem,0.7vw,0.85rem)] font-display font-semibold text-muted-foreground tracking-wide uppercase">
-              Notícias
-            </span>
+          <div className="flex items-center justify-between mb-[0.8vh]">
+            <div className="flex items-center gap-[0.4vw]">
+              <span className="w-[0.4vw] h-[0.4vw] min-w-[6px] min-h-[6px] rounded-full bg-neon animate-pulse-dot" />
+              <span className="text-[clamp(0.6rem,0.7vw,0.85rem)] font-display font-semibold text-muted-foreground tracking-wide uppercase">
+                Notícias
+              </span>
+            </div>
+            {lastUpdated && (
+              <span className="text-[clamp(0.45rem,0.55vw,0.65rem)] text-muted-foreground/60 font-body">
+                <LastUpdatedLabel date={lastUpdated} />
+              </span>
+            )}
           </div>
           <div className="flex-1 min-h-0">
             <NewsFeed news={news} emptyMessage={newsError ?? "Sem notícias disponíveis"} />
