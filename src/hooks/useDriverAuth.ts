@@ -49,5 +49,9 @@ export function useDriverAuth() {
     setCurrentDriver(null);
   }, []);
 
-  return { currentDriver, loginError, login, logout };
+  const updateDriver = useCallback(function (driver: Driver) {
+    setCurrentDriver(driver);
+  }, []);
+
+  return { currentDriver, loginError, login, logout, updateDriver };
 }

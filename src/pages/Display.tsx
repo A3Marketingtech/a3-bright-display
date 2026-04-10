@@ -8,6 +8,7 @@ import { NewsFeed } from "@/components/display/NewsFeed";
 import { MediaCarousel } from "@/components/display/MediaCarousel";
 import { DriverLogin } from "@/components/display/DriverLogin";
 import { DriverBadge } from "@/components/display/DriverBadge";
+import { ChangePasswordModal } from "@/components/display/ChangePasswordModal";
 import { useFirestore } from "@/hooks/useFirestore";
 import { useDriverAuth } from "@/hooks/useDriverAuth";
 import { useWeather } from "@/hooks/useWeather";
@@ -34,7 +35,7 @@ function useTimeAgoLabel(date: Date | null): string {
 const Display = () => {
   const tvCaps = useMemo(function () { return detectTV(); }, []);
   const { mediaItems, settings, syncStatus } = useFirestore();
-  const { currentDriver, loginError, login, logout } = useDriverAuth();
+  const { currentDriver, loginError, login, logout, updateDriver } = useDriverAuth();
 
   const weatherList = useWeather(settings.cities?.length ? settings.cities : [settings.city], settings.weatherApiKey);
   const { news, error: newsError, lastUpdated } = useNews();
@@ -42,6 +43,7 @@ const Display = () => {
 
   const [logoutPrompt, setLogoutPrompt] = useState(false);
   const [logoutPassword, setLogoutPassword] = useState("");
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   const handleLogoutSubmit = useCallback(() => {
     if (logoutPassword === settings.password) {
@@ -85,6 +87,13 @@ const Display = () => {
           {currentDriver && (
             <DriverBadge name={currentDriver.name} />
           )}
+          <button
+            onClick={() => setShowChangePassword(true)}
+            className="text-muted-foreground/40 hover:text-muted-foreground text-[clamp(0.6rem,0.8vw,1rem)] transition-colors"
+            title="Alterar Senha"
+          >
+            🔑
+          </button>
           <button
             onClick={() => { setLogoutPrompt(true); setLogoutPassword(""); }}
             className="text-muted-foreground/20 hover:text-muted-foreground text-[clamp(0.7rem,1vw,1.2rem)] transition-colors"
@@ -180,6 +189,17 @@ const Display = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {showChangePassword && currentDriver && (
+        <ChangePasswordModal
+          driver={currentDriver}
+          onClose={() => setShowChangePassword(false)}
+          onSuccess={(updated) => {
+            updateDriver(updated);
+            setShowChangePassword(false);
+          }}
+        />
       )}
     </div>
   );
