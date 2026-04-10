@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import vanIcon from "@/assets/van-icon.png";
+import a3Logo from "@/assets/a3-logo.png";
 
 import { WeatherWidget } from "@/components/display/WeatherWidget";
 import { Clock } from "@/components/display/Clock";
