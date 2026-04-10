@@ -6,6 +6,7 @@ import { Clock } from "@/components/display/Clock";
 import { NewsFeed } from "@/components/display/NewsFeed";
 import { MediaCarousel } from "@/components/display/MediaCarousel";
 import { DriverLogin } from "@/components/display/DriverLogin";
+import { DriverBadge } from "@/components/display/DriverBadge";
 import { useFirestore } from "@/hooks/useFirestore";
 import { useDriverAuth } from "@/hooks/useDriverAuth";
 import { useWeather } from "@/hooks/useWeather";
@@ -81,25 +82,7 @@ const Display = () => {
         {/* Right: driver status + logout */}
         <div className="flex items-center justify-end gap-[1.5vw] flex-1 min-w-0">
           {currentDriver && (
-            <div className="flex items-center gap-[0.8vw] bg-card/80 backdrop-blur-sm rounded-full px-[1vw] py-[0.4vh] border border-border overflow-hidden max-w-[22vw]">
-              <span
-                className="inline-block rounded-full bg-neon flex-shrink-0"
-                style={{
-                  width: "clamp(10px, 0.9vw, 18px)",
-                  height: "clamp(10px, 0.9vw, 18px)",
-                  animation: "pulse 2s cubic-bezier(0.4,0,0.6,1) infinite",
-                  boxShadow: "0 0 6px hsl(var(--neon) / 0.6)",
-                }}
-              />
-              <span className="text-[clamp(0.7rem,0.9vw,1.05rem)] font-display font-bold text-foreground/90 whitespace-nowrap flex-shrink-0">
-                On Trip
-              </span>
-              <span className="text-[clamp(0.65rem,0.85vw,1rem)] font-body text-foreground/70 whitespace-nowrap overflow-hidden">
-                <span className="inline-block driver-name-scroll">
-                  {currentDriver.name}
-                </span>
-              </span>
-            </div>
+            <DriverBadge name={currentDriver.name} />
           )}
           <button
             onClick={() => { setLogoutPrompt(true); setLogoutPassword(""); }}

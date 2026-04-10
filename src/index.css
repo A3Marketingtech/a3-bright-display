@@ -103,15 +103,6 @@
   display: inline-block;
 }
 
-@container (max-width: 0px) {
-  .driver-name-scroll { animation: none; }
-}
-
-/* Apply scroll only when parent overflows */
-.overflow-hidden > .driver-name-scroll {
-  animation: driver-scroll 6s linear infinite;
-}
-
 /* Smart TV compatibility: vendor prefixes */
 * {
   -webkit-box-sizing: border-box;
