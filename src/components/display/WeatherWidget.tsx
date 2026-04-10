@@ -35,10 +35,10 @@ export function WeatherWidget({ weatherList }: WeatherWidgetProps) {
         }}
       >
         <span className="text-[clamp(0.9rem,1.1vw,1.5rem)]">{weather.icon}</span>
-        <span className="text-[clamp(0.7rem,0.85vw,1.1rem)] font-display font-bold">{weather.temp}°C</span>
-        <span className="text-[clamp(0.55rem,0.7vw,0.85rem)] text-muted-foreground">{weather.city}</span>
-        <span className="text-[clamp(0.55rem,0.7vw,0.85rem)] text-muted-foreground">•</span>
-        <span className="text-[clamp(0.55rem,0.7vw,0.85rem)] text-muted-foreground capitalize">{weather.description}</span>
+        <span className="text-[clamp(0.7rem,0.9vw,1.05rem)] font-display font-bold">{weather.temp}°C</span>
+        <span className="text-[clamp(0.65rem,0.85vw,1rem)] text-muted-foreground">{weather.city}</span>
+        <span className="text-[clamp(0.65rem,0.85vw,1rem)] text-muted-foreground">•</span>
+        <span className="text-[clamp(0.65rem,0.85vw,1rem)] text-muted-foreground capitalize">{weather.description}</span>
       </div>
     </div>
   );
