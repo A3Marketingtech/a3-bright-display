@@ -66,21 +66,20 @@ const Display = () => {
         className="flex items-center justify-between border-b border-border/30 px-[2vw]"
         style={{ height: "8vh", flexShrink: 0 }}
       >
-        {/* Left: status + weather carousel */}
-        <div className="flex items-center gap-[1.5vw]">
-          
+        {/* Left: weather */}
+        <div className="flex items-center flex-1 min-w-0">
           {weatherList.length > 0 && (
             <WeatherWidget weatherList={weatherList} />
           )}
         </div>
 
         {/* Center: clock */}
-        <div className="absolute left-1/2 -translate-x-1/2">
+        <div className="flex items-center justify-center flex-shrink-0">
           <Clock />
         </div>
 
         {/* Right: driver status + logout */}
-        <div className="flex items-center gap-[1.5vw]">
+        <div className="flex items-center justify-end gap-[1.5vw] flex-1 min-w-0">
           {currentDriver && (
             <div className="flex items-center gap-[0.8vw] bg-card/80 backdrop-blur-sm rounded-full px-[1vw] py-[0.4vh] border border-border overflow-hidden max-w-[22vw]">
               <span
