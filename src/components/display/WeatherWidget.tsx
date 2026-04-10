@@ -26,9 +26,9 @@ export function WeatherWidget({ weatherList }: WeatherWidgetProps) {
   var weather = weatherList[index % weatherList.length];
 
   return (
-    <div className="flex items-center gap-[0.5vw] bg-card/80 rounded-full px-[1vw] py-[0.4vh] border border-border overflow-hidden min-w-[clamp(200px,16vw,300px)]">
+    <div className="flex items-center gap-[0.5vw] bg-card/80 backdrop-blur-sm rounded-full px-[1vw] py-[0.4vh] border border-border overflow-hidden min-w-[clamp(200px,16vw,300px)] leading-none">
       <div
-        className="flex items-center gap-[0.5vw]"
+        className="flex items-center gap-[0.5vw] leading-none"
         style={{
           opacity: visible ? 1 : 0,
           transition: "opacity 0.2s ease-in-out",
