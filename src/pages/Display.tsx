@@ -190,6 +190,17 @@ const Display = () => {
           </div>
         </div>
       )}
+
+      {showChangePassword && currentDriver && (
+        <ChangePasswordModal
+          driver={currentDriver}
+          onClose={() => setShowChangePassword(false)}
+          onSuccess={(updated) => {
+            updateDriver(updated);
+            setShowChangePassword(false);
+          }}
+        />
+      )}
     </div>
   );
 };
