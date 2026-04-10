@@ -147,7 +147,10 @@ const Display = () => {
         className="flex items-center justify-center border-t border-border/20"
         style={{ height: "8vh", flexShrink: 0 }}
       >
-        <img src={a3Logo} alt="A³ Marketing" className="h-[3.5vh] w-auto object-contain" />
+        <div className="flex items-center gap-[0.4vw]">
+          <span className="text-[clamp(0.55rem,0.7vw,0.85rem)] text-muted-foreground/60 font-body tracking-wider">Powered by</span>
+          <img src={a3Logo} alt="A³ Marketing" className="h-[3vh] w-auto object-contain" />
+        </div>
       </footer>
 
       {/* Logout modal — unchanged */}
