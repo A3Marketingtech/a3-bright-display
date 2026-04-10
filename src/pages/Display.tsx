@@ -35,7 +35,7 @@ function useTimeAgoLabel(date: Date | null): string {
 const Display = () => {
   const tvCaps = useMemo(function () { return detectTV(); }, []);
   const { mediaItems, settings, syncStatus } = useFirestore();
-  const { currentDriver, loginError, login, logout } = useDriverAuth();
+  const { currentDriver, loginError, login, logout, updateDriver } = useDriverAuth();
 
   const weatherList = useWeather(settings.cities?.length ? settings.cities : [settings.city], settings.weatherApiKey);
   const { news, error: newsError, lastUpdated } = useNews();
@@ -43,6 +43,7 @@ const Display = () => {
 
   const [logoutPrompt, setLogoutPrompt] = useState(false);
   const [logoutPassword, setLogoutPassword] = useState("");
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   const handleLogoutSubmit = useCallback(() => {
     if (logoutPassword === settings.password) {
