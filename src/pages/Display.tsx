@@ -147,9 +147,7 @@ const Display = () => {
         className="flex items-center justify-center border-t border-border/20"
         style={{ height: "8vh", flexShrink: 0 }}
       >
-        <p className="text-[clamp(0.55rem,0.7vw,0.85rem)] text-muted-foreground/60 font-body tracking-wider">
-          Powered by A³ Marketing & Tech
-        </p>
+        <img src={a3Logo} alt="A³ Marketing" className="h-[3.5vh] w-auto object-contain" />
       </footer>
 
       {/* Logout modal — unchanged */}
