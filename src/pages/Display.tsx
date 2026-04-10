@@ -49,6 +49,7 @@ const Display = () => {
     if (logoutPassword === settings.password) {
       setLogoutPrompt(false);
       setLogoutPassword("");
+      setShowChangePassword(false);
       logout();
     }
   }, [logoutPassword, settings.password, logout]);
