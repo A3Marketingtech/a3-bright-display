@@ -6,6 +6,7 @@ import { Clock } from "@/components/display/Clock";
 import { NewsFeed } from "@/components/display/NewsFeed";
 import { MediaCarousel } from "@/components/display/MediaCarousel";
 import { DriverLogin } from "@/components/display/DriverLogin";
+import { DriverBadge } from "@/components/display/DriverBadge";
 import { useFirestore } from "@/hooks/useFirestore";
 import { useDriverAuth } from "@/hooks/useDriverAuth";
 import { useWeather } from "@/hooks/useWeather";
