@@ -79,8 +79,29 @@ const Display = () => {
           <Clock />
         </div>
 
-        {/* Right: logout */}
+        {/* Right: driver status + logout */}
         <div className="flex items-center gap-[1.5vw]">
+          {currentDriver && (
+            <div className="flex items-center gap-[0.6vw] overflow-hidden max-w-[20vw]">
+              <span
+                className="inline-block rounded-full bg-neon flex-shrink-0"
+                style={{
+                  width: "clamp(8px, 0.7vw, 14px)",
+                  height: "clamp(8px, 0.7vw, 14px)",
+                  animation: "pulse 2s cubic-bezier(0.4,0,0.6,1) infinite",
+                  boxShadow: "0 0 6px hsl(var(--neon) / 0.6)",
+                }}
+              />
+              <span className="text-[clamp(0.55rem,0.7vw,0.85rem)] font-body text-foreground/90 whitespace-nowrap flex-shrink-0">
+                On Trip
+              </span>
+              <span className="text-[clamp(0.5rem,0.65vw,0.8rem)] font-body text-foreground/70 whitespace-nowrap overflow-hidden">
+                <span className="inline-block driver-name-scroll">
+                  {currentDriver.name}
+                </span>
+              </span>
+            </div>
+          )}
           <button
             onClick={() => { setLogoutPrompt(true); setLogoutPassword(""); }}
             className="text-muted-foreground/20 hover:text-muted-foreground text-[clamp(0.7rem,1vw,1.2rem)] transition-colors"
