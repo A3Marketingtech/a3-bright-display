@@ -82,20 +82,20 @@ const Display = () => {
         {/* Right: driver status + logout */}
         <div className="flex items-center gap-[1.5vw]">
           {currentDriver && (
-            <div className="flex items-center gap-[0.6vw] overflow-hidden max-w-[20vw]">
+            <div className="flex items-center gap-[0.8vw] overflow-hidden max-w-[22vw]">
               <span
                 className="inline-block rounded-full bg-neon flex-shrink-0"
                 style={{
-                  width: "clamp(8px, 0.7vw, 14px)",
-                  height: "clamp(8px, 0.7vw, 14px)",
+                  width: "clamp(10px, 0.9vw, 18px)",
+                  height: "clamp(10px, 0.9vw, 18px)",
                   animation: "pulse 2s cubic-bezier(0.4,0,0.6,1) infinite",
                   boxShadow: "0 0 6px hsl(var(--neon) / 0.6)",
                 }}
               />
-              <span className="text-[clamp(0.55rem,0.7vw,0.85rem)] font-body text-foreground/90 whitespace-nowrap flex-shrink-0">
+              <span className="text-[clamp(0.7rem,0.9vw,1.05rem)] font-body text-foreground/90 whitespace-nowrap flex-shrink-0">
                 On Trip
               </span>
-              <span className="text-[clamp(0.5rem,0.65vw,0.8rem)] font-body text-foreground/70 whitespace-nowrap overflow-hidden">
+              <span className="text-[clamp(0.65rem,0.85vw,1rem)] font-body text-foreground/70 whitespace-nowrap overflow-hidden">
                 <span className="inline-block driver-name-scroll">
                   {currentDriver.name}
                 </span>
