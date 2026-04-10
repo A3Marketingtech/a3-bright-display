@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import { ManagementPanel } from "@/components/management/ManagementPanel";
 import { useFirestore } from "@/hooks/useFirestore";
 import a3Logo from "@/assets/a3-logo.png";
-import { useFirestore } from "@/hooks/useFirestore";
 
 const Admin = () => {
   const {
