@@ -88,6 +88,13 @@ const Display = () => {
             <DriverBadge name={currentDriver.name} />
           )}
           <button
+            onClick={() => setShowChangePassword(true)}
+            className="text-muted-foreground/40 hover:text-muted-foreground text-[clamp(0.6rem,0.8vw,1rem)] transition-colors"
+            title="Alterar Senha"
+          >
+            🔑
+          </button>
+          <button
             onClick={() => { setLogoutPrompt(true); setLogoutPassword(""); }}
             className="text-muted-foreground/20 hover:text-muted-foreground text-[clamp(0.7rem,1vw,1.2rem)] transition-colors"
             title="Logout"
