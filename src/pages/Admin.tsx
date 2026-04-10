@@ -1,6 +1,8 @@
 import { useState, useCallback } from "react";
 import { ManagementPanel } from "@/components/management/ManagementPanel";
 import { useFirestore } from "@/hooks/useFirestore";
+import a3Logo from "@/assets/a3-logo.png";
+import { useFirestore } from "@/hooks/useFirestore";
 
 const Admin = () => {
   const {
@@ -24,7 +26,7 @@ const Admin = () => {
         <div className="w-full max-w-sm px-6">
           <div className="text-center mb-10">
             <h1 className="font-display font-bold text-3xl tracking-tight mb-2">
-              A<sup className="text-neon text-lg">3</sup>
+              <img src={a3Logo} alt="A³ Marketing" className="h-16 w-auto object-contain mx-auto" />
             </h1>
             <p className="text-xs text-muted-foreground font-display uppercase tracking-widest">
               Painel Administrativo
