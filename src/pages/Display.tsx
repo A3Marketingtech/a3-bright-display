@@ -82,7 +82,7 @@ const Display = () => {
         {/* Right: driver status + logout */}
         <div className="flex items-center gap-[1.5vw]">
           {currentDriver && (
-            <div className="flex items-center gap-[0.8vw] overflow-hidden max-w-[22vw]">
+            <div className="flex items-center gap-[0.8vw] bg-card/80 backdrop-blur-sm rounded-full px-[1vw] py-[0.4vh] border border-border overflow-hidden max-w-[22vw]">
               <span
                 className="inline-block rounded-full bg-neon flex-shrink-0"
                 style={{
@@ -92,7 +92,7 @@ const Display = () => {
                   boxShadow: "0 0 6px hsl(var(--neon) / 0.6)",
                 }}
               />
-              <span className="text-[clamp(0.7rem,0.9vw,1.05rem)] font-body text-foreground/90 whitespace-nowrap flex-shrink-0">
+              <span className="text-[clamp(0.7rem,0.9vw,1.05rem)] font-display font-bold text-foreground/90 whitespace-nowrap flex-shrink-0">
                 On Trip
               </span>
               <span className="text-[clamp(0.65rem,0.85vw,1rem)] font-body text-foreground/70 whitespace-nowrap overflow-hidden">
