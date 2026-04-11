@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Display from "./pages/Display.tsx";
 import Admin from "./pages/Admin.tsx";
+import AdvertiserLogin from "./pages/AdvertiserLogin.tsx";
+import AdvertiserDashboard from "./pages/AdvertiserDashboard.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -18,6 +20,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Display />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/advertiser" element={<AdvertiserLogin />} />
+          <Route path="/advertiser/dashboard" element={<AdvertiserDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </HashRouter>
