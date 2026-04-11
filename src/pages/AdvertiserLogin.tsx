@@ -92,9 +92,10 @@ export default function AdvertiserLogin() {
           </button>
         </div>
 
-        <p className="text-center text-xs text-muted-foreground/40">
-          Powered by A³ Marketing
-        </p>
+        <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground/40">
+          <span>Powered by</span>
+          <img src={a3Logo} alt="A³ Marketing" className="h-4 w-auto opacity-40" />
+        </div>
       </div>
     </div>
   );
