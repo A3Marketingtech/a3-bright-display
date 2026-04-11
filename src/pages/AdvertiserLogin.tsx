@@ -53,7 +53,7 @@ export default function AdvertiserLogin() {
       <div className="w-full max-w-sm space-y-6">
         {/* Logo */}
         <div className="flex justify-center">
-          <img src={a3Logo} alt="A³ Marketing" className="h-20 w-auto" />
+          <img src={a3Logo} alt="A³ Marketing" className="h-80 w-auto" />
         </div>
 
         <h1 className="text-center text-xl font-display font-bold text-foreground">
