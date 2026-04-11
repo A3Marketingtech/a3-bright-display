@@ -120,6 +120,13 @@ export function AdvertisersTab() {
           onChange={(e) => setPhone(e.target.value)}
           className={inputClass}
         />
+        <input
+          type="password"
+          placeholder="Senha de acesso ao painel"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className={inputClass}
+        />
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
