@@ -55,6 +55,7 @@ export interface Advertiser {
   name: string;
   email: string;
   phone: string;
+  password: string;
   contractStart: string; // ISO date
   contractEnd: string;   // ISO date
   autoRenew: boolean;
