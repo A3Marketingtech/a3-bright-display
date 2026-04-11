@@ -8,6 +8,7 @@ export interface MediaItem {
   duration: number;
   order: number;
   categories?: string[]; // array of category IDs
+  advertiserId?: string; // linked advertiser
 }
 
 export interface AppSettings {
@@ -47,6 +48,16 @@ export interface NewsItem {
   title: string;
   source: string;
   publishedAt: string;
+}
+
+export interface Advertiser {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  contractStart: string; // ISO date
+  contractEnd: string;   // ISO date
+  autoRenew: boolean;
 }
 
 export type SyncStatus = "online" | "saving" | "error";
