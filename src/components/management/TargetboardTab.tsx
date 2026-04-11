@@ -47,13 +47,31 @@ export function TargetboardTab() {
 
   const addDriver = useCallback(async () => {
     if (!dName || !dLogin || !dPassword || !dCategory) return;
-    const id = crypto.randomUUID();
-    await setDoc(doc(db, "drivers", id), {
-      name: dName, login: dLogin, password: dPassword,
-      vehicle: dVehicle, vin: dVin, categoryId: dCategory,
-    });
-    setDName(""); setDLogin(""); setDPassword(""); setDVehicle(""); setDVin(""); setDCategory("");
-  }, [dName, dLogin, dPassword, dVehicle, dVin, dCategory]);
+    setUploadingPhoto(true);
+    try {
+      let vehiclePhotoUrl = "";
+      if (dVehiclePhoto) {
+        const ext = dVehiclePhoto.name.split(".").pop() || "jpg";
+        const fileName = `vehicles/${Date.now()}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
+        const storageRef = ref(storage, fileName);
+        await uploadBytesResumable(storageRef, dVehiclePhoto);
+        vehiclePhotoUrl = await getDownloadURL(storageRef);
+      }
+      const id = crypto.randomUUID();
+      await setDoc(doc(db, "drivers", id), {
+        name: dName, login: dLogin, password: dPassword,
+        vehicle: dVehicle, vin: dVin, categoryId: dCategory,
+        ...(vehiclePhotoUrl ? { vehiclePhoto: vehiclePhotoUrl } : {}),
+      });
+      setDName(""); setDLogin(""); setDPassword(""); setDVehicle(""); setDVin(""); setDCategory("");
+      setDVehiclePhoto(null); setDVehiclePhotoPreview("");
+    } catch (err) {
+      console.error("Erro ao adicionar motorista:", err);
+      alert("Erro ao adicionar motorista. Verifique a conexão.");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }, [dName, dLogin, dPassword, dVehicle, dVin, dCategory, dVehiclePhoto]);
 
   const removeDriver = useCallback(async (id: string) => {
     await deleteDoc(doc(db, "drivers", id));
