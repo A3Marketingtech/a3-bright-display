@@ -7,6 +7,8 @@ import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
 import { TargetboardTab } from "./TargetboardTab";
+import { AdvertisersTab } from "./AdvertisersTab";
+import type { Advertiser } from "@/lib/types";
 interface ManagementPanelProps {
   open: boolean;
   onClose: () => void;
@@ -20,7 +22,7 @@ interface ManagementPanelProps {
   onSaveSettings: (settings: AppSettings) => Promise<void>;
 }
 
-type Tab = "add" | "media" | "settings" | "targetboard" | "news";
+type Tab = "add" | "media" | "settings" | "targetboard" | "news" | "advertisers";
 
 export function ManagementPanel({
   open,
@@ -43,12 +45,23 @@ export function ManagementPanel({
   const [testResult, setTestResult] = useState<string | null>(null);
   const [cityInput, setCityInput] = useState("");
   const [categories, setCategories] = useState<VehicleCategory[]>([]);
+  const [advertisers, setAdvertisers] = useState<Advertiser[]>([]);
+  const [selectedAdvertiserId, setSelectedAdvertiserId] = useState("");
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "categories"), (snap) => {
       const list: VehicleCategory[] = [];
       snap.forEach((d) => list.push({ id: d.id, ...d.data() } as VehicleCategory));
       setCategories(list);
+    });
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "advertisers"), (snap) => {
+      const list: Advertiser[] = [];
+      snap.forEach((d) => list.push({ id: d.id, ...d.data() } as Advertiser));
+      setAdvertisers(list);
     });
     return unsub;
   }, []);
@@ -87,9 +100,11 @@ export function ManagementPanel({
       type: mediaType,
       source: resolveMediaSource(url),
       duration: 10,
+      ...(selectedAdvertiserId ? { advertiserId: selectedAdvertiserId } : {}),
     });
     setUrl("");
     setMediaName("");
+    setSelectedAdvertiserId("");
   }, [url, mediaName, mediaType, onAddMedia]);
 
   const compressImage = useCallback((file: File, maxWidth = 1280, quality = 0.7): Promise<string> => {
@@ -159,7 +174,9 @@ export function ManagementPanel({
           type: isVideo ? "video" : "image",
           source: "local",
           duration: isVideo ? 0 : 10,
+          ...(selectedAdvertiserId ? { advertiserId: selectedAdvertiserId } : {}),
         });
+        setSelectedAdvertiserId("");
       } catch (err) {
         console.error("Upload failed:", err);
         alert("Erro no upload. Verifique as permissões do Firebase Storage.");
@@ -191,11 +208,17 @@ export function ManagementPanel({
 
   // News test removed - now handled via backend sync
 
+  const activeAdvertisers = advertisers.filter((a) => {
+    const expired = new Date(a.contractEnd) < new Date();
+    return !expired || a.autoRenew;
+  });
+
   const tabs: { id: Tab; label: string }[] = [
     { id: "add", label: "Adicionar" },
     { id: "media", label: "Mídias" },
     { id: "targetboard", label: "TARGETBOARD" },
     { id: "news", label: "Notícias" },
+    { id: "advertisers", label: "Anunciantes" },
     { id: "settings", label: "Configurações" },
   ];
 
@@ -320,6 +343,22 @@ export function ManagementPanel({
                       >
                         Vídeo
                       </button>
+                    </div>
+                    {/* Advertiser selector */}
+                    <div className="space-y-1">
+                      <label className="text-xs font-display font-medium text-muted-foreground">
+                        Anunciante
+                      </label>
+                      <select
+                        value={selectedAdvertiserId}
+                        onChange={(e) => setSelectedAdvertiserId(e.target.value)}
+                        className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm font-body focus:outline-none focus:border-neon/50 transition-colors"
+                      >
+                        <option value="">Sem anunciante</option>
+                        {activeAdvertisers.map((a) => (
+                          <option key={a.id} value={a.id}>{a.name}</option>
+                        ))}
+                      </select>
                     </div>
                     <button
                       onClick={handleAddUrl}
@@ -456,6 +495,8 @@ export function ManagementPanel({
               )}
 
               {tab === "targetboard" && <TargetboardTab />}
+
+              {tab === "advertisers" && <AdvertisersTab />}
 
               {tab === "news" && <NewsStatusPanel />}
 
