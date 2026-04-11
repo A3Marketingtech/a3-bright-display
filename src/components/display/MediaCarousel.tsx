@@ -3,9 +3,18 @@ import type { MediaItem } from "@/lib/types";
 import { getMediaPlaybackUrls } from "@/lib/media";
 import { type TVCapabilities, getOptimizedImageUrl } from "@/lib/tvDetection";
 
+export interface ImpressionEvent {
+  mediaId: string;
+  mediaName: string;
+  startTime: Date;
+  endTime: Date;
+  duration: number;
+}
+
 interface MediaCarouselProps {
   items: MediaItem[];
   tvCapabilities?: TVCapabilities;
+  onImpressionComplete?: (event: ImpressionEvent) => void;
 }
 
 function getGoogleDriveEmbedUrl(rawUrl: string): string | null {
