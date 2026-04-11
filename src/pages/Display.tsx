@@ -4,6 +4,8 @@ import a3Logo from "@/assets/a3-logo.png";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import type { Advertiser } from "@/lib/types";
+import { startTracking, stopTracking, recordImpression, recordInstantEvent } from "@/lib/impressionTracker";
+import type { ImpressionEvent } from "@/components/display/MediaCarousel";
 
 import { WeatherWidget } from "@/components/display/WeatherWidget";
 import { Clock } from "@/components/display/Clock";
