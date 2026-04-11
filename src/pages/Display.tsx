@@ -107,11 +107,16 @@ const Display = () => {
 
       {/* ── 2. WELCOME MESSAGE (~6%) ── */}
       <div
-        className="flex items-center justify-center"
+        className="flex items-center justify-center gap-[1vw]"
         style={{ height: "6vh", flexShrink: 0 }}
       >
+        {currentDriver?.vehiclePhoto ? (
+          <img src={currentDriver.vehiclePhoto} alt="Veículo" className="h-[4vh] w-auto object-contain rounded-md" />
+        ) : (
+          <img src={vanIcon} alt="van" className="h-[4vh] w-auto object-contain" />
+        )}
         <p className="text-[clamp(1.2rem,2vw,2.5rem)] font-display font-semibold text-foreground tracking-wide">
-          Welcome — Enjoy Your Ride <img src={vanIcon} alt="van" className="inline-block h-[2em] w-auto align-middle ml-[0.3em]" />
+          Welcome — Enjoy Your Ride
         </p>
       </div>
 
@@ -172,13 +177,13 @@ const Display = () => {
         >
           <div className="bg-card border border-border rounded-2xl p-[2vw] w-[clamp(280px,22vw,400px)]" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-display font-bold text-[clamp(0.8rem,1vw,1.1rem)] mb-[0.5vh]">Logout do Motorista</h3>
-            <p className="text-[clamp(0.65rem,0.75vw,0.85rem)] text-muted-foreground mb-[1.5vh]">Digite a senha do painel para confirmar</p>
+            <p className="text-[clamp(0.65rem,0.75vw,0.85rem)] text-muted-foreground mb-[1.5vh]">Digite sua senha para confirmar</p>
             <input
               type="password"
               value={logoutPassword}
               onChange={(e) => setLogoutPassword(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleLogoutSubmit()}
-              placeholder="Senha do painel"
+              placeholder="Sua senha"
               className="w-full bg-secondary border border-border rounded-lg px-[1vw] py-[0.8vh] text-[clamp(0.75rem,0.85vw,1rem)] font-body focus:outline-none focus:border-neon/50 transition-colors mb-[1.5vh]"
               autoFocus
             />
