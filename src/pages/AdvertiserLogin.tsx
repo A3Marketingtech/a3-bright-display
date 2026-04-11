@@ -30,12 +30,9 @@ export default function AdvertiserLogin() {
         return;
       }
 
-      const doc = match;
+      const adv = { id: match.id, ...match.data() } as Advertiser;
 
-      const doc = snap.docs[0];
-      const adv = { id: doc.id, ...doc.data() } as Advertiser;
-
-      if (adv.password !== password) {
+      if (adv.password !== password.trim()) {
         setError("Email ou senha incorretos");
         setLoading(false);
         return;
