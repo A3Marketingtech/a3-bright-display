@@ -113,11 +113,12 @@ const Display = () => {
         <p className="text-[clamp(1.2rem,2vw,2.5rem)] font-display font-semibold text-foreground tracking-wide">
           Welcome — Enjoy Your Ride
         </p>
-        {currentDriver?.vehiclePhoto ? (
-          <img src={currentDriver.vehiclePhoto} alt="Veículo" className="h-[4vh] w-auto object-contain rounded-md" />
-        ) : (
-          <img src={vanIcon} alt="van" className="h-[4vh] w-auto object-contain" />
-        )}
+        <img
+          src={currentDriver?.vehiclePhoto || vanIcon}
+          alt={currentDriver?.vehiclePhoto ? "Veículo" : "van"}
+          className="object-cover rounded-md"
+          style={{ width: "7vh", height: "4vh" }}
+        />
       </div>
 
       {/* ── 3. MAIN CONTENT (~78%) ── */}
