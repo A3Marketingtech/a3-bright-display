@@ -20,6 +20,10 @@ export function TargetboardTab() {
   const [dLogin, setDLogin] = useState("");
   const [dPassword, setDPassword] = useState("");
   const [dVehicle, setDVehicle] = useState("");
+  const [dVehiclePhoto, setDVehiclePhoto] = useState<File | null>(null);
+  const [dVehiclePhotoPreview, setDVehiclePhotoPreview] = useState("");
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const vehiclePhotoRef = useRef<HTMLInputElement>(null);
   const [dVin, setDVin] = useState("");
   const [dCategory, setDCategory] = useState("");
 
