@@ -1,6 +1,9 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import vanIcon from "@/assets/van-icon.png";
 import a3Logo from "@/assets/a3-logo.png";
+import { db } from "@/lib/firebase";
+import { collection, onSnapshot } from "firebase/firestore";
+import type { Advertiser } from "@/lib/types";
 
 import { WeatherWidget } from "@/components/display/WeatherWidget";
 import { Clock } from "@/components/display/Clock";
@@ -44,6 +47,16 @@ const Display = () => {
   const [logoutPrompt, setLogoutPrompt] = useState(false);
   const [logoutPassword, setLogoutPassword] = useState("");
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [advertisers, setAdvertisers] = useState<Advertiser[]>([]);
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "advertisers"), (snap) => {
+      const list: Advertiser[] = [];
+      snap.forEach((d) => list.push({ id: d.id, ...d.data() } as Advertiser));
+      setAdvertisers(list);
+    });
+    return unsub;
+  }, []);
 
   const handleLogoutSubmit = useCallback(() => {
     if (currentDriver && logoutPassword === currentDriver.password) {
@@ -54,8 +67,20 @@ const Display = () => {
     }
   }, [logoutPassword, currentDriver, logout]);
 
+  // Filter out media from expired (non-auto-renew) advertisers
+  const expiredAdvertiserIds = useMemo(() => {
+    const now = new Date();
+    return new Set(
+      advertisers
+        .filter((a) => new Date(a.contractEnd) < now && !a.autoRenew)
+        .map((a) => a.id)
+    );
+  }, [advertisers]);
+
   const filteredMedia = currentDriver
-    ? mediaItems.filter((item) => (item.categories || []).includes(currentDriver.categoryId))
+    ? mediaItems
+        .filter((item) => (item.categories || []).includes(currentDriver.categoryId))
+        .filter((item) => !item.advertiserId || !expiredAdvertiserIds.has(item.advertiserId))
     : [];
 
   if (!currentDriver) {
