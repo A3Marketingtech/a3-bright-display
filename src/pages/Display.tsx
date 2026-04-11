@@ -46,13 +46,13 @@ const Display = () => {
   const [showChangePassword, setShowChangePassword] = useState(false);
 
   const handleLogoutSubmit = useCallback(() => {
-    if (logoutPassword === settings.password) {
+    if (currentDriver && logoutPassword === currentDriver.password) {
       setLogoutPrompt(false);
       setLogoutPassword("");
       setShowChangePassword(false);
       logout();
     }
-  }, [logoutPassword, settings.password, logout]);
+  }, [logoutPassword, currentDriver, logout]);
 
   const filteredMedia = currentDriver
     ? mediaItems.filter((item) => (item.categories || []).includes(currentDriver.categoryId))
