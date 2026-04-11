@@ -110,14 +110,14 @@ const Display = () => {
         className="flex items-center justify-center gap-[1vw]"
         style={{ height: "6vh", flexShrink: 0 }}
       >
+        <p className="text-[clamp(1.2rem,2vw,2.5rem)] font-display font-semibold text-foreground tracking-wide">
+          Welcome — Enjoy Your Ride
+        </p>
         {currentDriver?.vehiclePhoto ? (
           <img src={currentDriver.vehiclePhoto} alt="Veículo" className="h-[4vh] w-auto object-contain rounded-md" />
         ) : (
           <img src={vanIcon} alt="van" className="h-[4vh] w-auto object-contain" />
         )}
-        <p className="text-[clamp(1.2rem,2vw,2.5rem)] font-display font-semibold text-foreground tracking-wide">
-          Welcome — Enjoy Your Ride
-        </p>
       </div>
 
       {/* ── 3. MAIN CONTENT (~78%) ── */}
