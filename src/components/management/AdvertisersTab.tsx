@@ -35,6 +35,7 @@ export function AdvertisersTab() {
     setName("");
     setEmail("");
     setPhone("");
+    setPassword("");
     setContractStart("");
     setContractEnd("");
     setAutoRenew(false);
@@ -48,6 +49,7 @@ export function AdvertisersTab() {
       name: name.trim(),
       email: email.trim(),
       phone: phone.trim(),
+      password: password.trim(),
       contractStart,
       contractEnd,
       autoRenew,
@@ -60,12 +62,13 @@ export function AdvertisersTab() {
       await setDoc(doc(db, "advertisers", id), data);
     }
     resetForm();
-  }, [name, email, phone, contractStart, contractEnd, autoRenew, editingId]);
+  }, [name, email, phone, password, contractStart, contractEnd, autoRenew, editingId]);
 
   const handleEdit = (adv: Advertiser) => {
     setName(adv.name);
     setEmail(adv.email);
     setPhone(adv.phone);
+    setPassword(adv.password || "");
     setContractStart(adv.contractStart);
     setContractEnd(adv.contractEnd);
     setAutoRenew(adv.autoRenew);
