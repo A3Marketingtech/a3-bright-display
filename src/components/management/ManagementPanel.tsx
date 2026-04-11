@@ -7,6 +7,8 @@ import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
 import { TargetboardTab } from "./TargetboardTab";
+import { AdvertisersTab } from "./AdvertisersTab";
+import type { Advertiser } from "@/lib/types";
 interface ManagementPanelProps {
   open: boolean;
   onClose: () => void;
@@ -20,7 +22,7 @@ interface ManagementPanelProps {
   onSaveSettings: (settings: AppSettings) => Promise<void>;
 }
 
-type Tab = "add" | "media" | "settings" | "targetboard" | "news";
+type Tab = "add" | "media" | "settings" | "targetboard" | "news" | "advertisers";
 
 export function ManagementPanel({
   open,
@@ -43,12 +45,23 @@ export function ManagementPanel({
   const [testResult, setTestResult] = useState<string | null>(null);
   const [cityInput, setCityInput] = useState("");
   const [categories, setCategories] = useState<VehicleCategory[]>([]);
+  const [advertisers, setAdvertisers] = useState<Advertiser[]>([]);
+  const [selectedAdvertiserId, setSelectedAdvertiserId] = useState("");
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "categories"), (snap) => {
       const list: VehicleCategory[] = [];
       snap.forEach((d) => list.push({ id: d.id, ...d.data() } as VehicleCategory));
       setCategories(list);
+    });
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "advertisers"), (snap) => {
+      const list: Advertiser[] = [];
+      snap.forEach((d) => list.push({ id: d.id, ...d.data() } as Advertiser));
+      setAdvertisers(list);
     });
     return unsub;
   }, []);
