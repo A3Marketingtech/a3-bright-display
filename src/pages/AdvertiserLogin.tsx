@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import a3Logo from "@/assets/a3-logo.png";
 import type { Advertiser } from "@/lib/types";
 
@@ -57,7 +57,7 @@ export default function AdvertiserLogin() {
         </div>
 
         <h1 className="text-center text-xl font-display font-bold text-foreground">
-          Painel do Anunciante
+          ADVERTISER PORTAL
         </h1>
 
         <div className="space-y-3">
