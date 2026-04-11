@@ -35,8 +35,9 @@ function getGoogleDriveEmbedUrl(rawUrl: string): string | null {
   }
 }
 
-export function MediaCarousel({ items, tvCapabilities }: MediaCarouselProps) {
+export function MediaCarousel({ items, tvCapabilities, onImpressionComplete }: MediaCarouselProps) {
   const [current, setCurrent] = useState(0);
+  const slideStartRef = useRef<Date>(new Date());
   const [progress, setProgress] = useState(0);
   const [videoSourceIndex, setVideoSourceIndex] = useState(0);
   const [visible, setVisible] = useState(true);
