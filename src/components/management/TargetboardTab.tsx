@@ -143,6 +143,48 @@ export function TargetboardTab() {
           <input placeholder="Login (usuário)" value={dLogin} onChange={(e) => setDLogin(e.target.value)} className={inputClass} />
           <input type="password" placeholder="Senha" value={dPassword} onChange={(e) => setDPassword(e.target.value)} className={inputClass} />
           <input placeholder="Modelo do veículo" value={dVehicle} onChange={(e) => setDVehicle(e.target.value)} className={inputClass} />
+          
+          {/* Foto do Veículo */}
+          <div className="space-y-2">
+            <label className="text-xs font-display font-medium text-muted-foreground">Foto do Veículo</label>
+            <input
+              ref={vehiclePhotoRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setDVehiclePhoto(file);
+                  setDVehiclePhotoPreview(URL.createObjectURL(file));
+                }
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => vehiclePhotoRef.current?.click()}
+              className="w-full border-2 border-dashed border-border hover:border-neon/30 rounded-xl py-4 flex flex-col items-center gap-1 transition-colors"
+            >
+              {dVehiclePhotoPreview ? (
+                <img src={dVehiclePhotoPreview} alt="Preview" className="h-20 w-auto rounded-lg object-cover" />
+              ) : (
+                <>
+                  <span className="text-lg">📷</span>
+                  <span className="text-xs text-muted-foreground">Clique para selecionar foto</span>
+                </>
+              )}
+            </button>
+            {dVehiclePhoto && (
+              <button
+                type="button"
+                onClick={() => { setDVehiclePhoto(null); setDVehiclePhotoPreview(""); if (vehiclePhotoRef.current) vehiclePhotoRef.current.value = ""; }}
+                className="text-xs text-destructive hover:underline"
+              >
+                Remover foto
+              </button>
+            )}
+          </div>
+
           <input placeholder="VIN number" value={dVin} onChange={(e) => setDVin(e.target.value)} className={inputClass} />
           <select value={dCategory} onChange={(e) => setDCategory(e.target.value)} className={inputClass}>
             <option value="">Selecione a categoria</option>
@@ -153,7 +195,9 @@ export function TargetboardTab() {
           {categories.length === 0 && (
             <p className="text-xs text-destructive">Cadastre categorias antes de adicionar motoristas.</p>
           )}
-          <button onClick={addDriver} disabled={!dName || !dLogin || !dPassword || !dCategory} className={btnClass}>Adicionar Motorista</button>
+          <button onClick={addDriver} disabled={!dName || !dLogin || !dPassword || !dCategory || uploadingPhoto} className={btnClass}>
+            {uploadingPhoto ? "Enviando..." : "Adicionar Motorista"}
+          </button>
 
           <div className="h-px bg-border" />
           <h3 className="text-sm font-display font-semibold">Motoristas cadastrados</h3>
