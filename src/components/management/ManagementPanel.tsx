@@ -48,6 +48,10 @@ export function ManagementPanel({
   const [categories, setCategories] = useState<VehicleCategory[]>([]);
   const [advertisers, setAdvertisers] = useState<Advertiser[]>([]);
   const [selectedAdvertiserId, setSelectedAdvertiserId] = useState("");
+  const [editingMedia, setEditingMedia] = useState<MediaItem | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editAdvertiserId, setEditAdvertiserId] = useState("");
+  const [deletingMediaId, setDeletingMediaId] = useState<string | null>(null);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "categories"), (snap) => {
