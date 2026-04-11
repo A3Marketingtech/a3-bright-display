@@ -205,8 +205,11 @@ export function TargetboardTab() {
           {drivers.map((d) => {
             const cat = categories.find((c) => c.id === d.categoryId);
             return (
-              <div key={d.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg border border-border">
-                <div>
+              <div key={d.id} className="flex items-center gap-3 p-3 bg-secondary rounded-lg border border-border">
+                {d.vehiclePhoto && (
+                  <img src={d.vehiclePhoto} alt="Veículo" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
                   <p className="text-sm font-body font-medium">{d.name}</p>
                   <p className="text-xs text-muted-foreground">
                     {d.vehicle} • {cat?.name || "Sem categoria"} • Login: {d.login} • Senha: {d.password}
