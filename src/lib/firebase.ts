@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, enableNetwork, disableNetwork } from "firebase/firestore";
+import { getFirestore, enableNetwork, disableNetwork, enableIndexedDbPersistence } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -14,6 +14,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+// Enable offline persistence — data survives network loss
+enableIndexedDbPersistence(db).catch(function (err) {
+  if (err.code === 'failed-precondition') {
+    console.warn('[A3] Persistence failed: multiple tabs open');
+  } else if (err.code === 'unimplemented') {
+    console.warn('[A3] Persistence not available in this browser');
+  }
+});
 
 /**
  * Ensure Firestore network is enabled with a timeout.

@@ -3,9 +3,18 @@ import type { MediaItem } from "@/lib/types";
 import { getMediaPlaybackUrls } from "@/lib/media";
 import { type TVCapabilities, getOptimizedImageUrl } from "@/lib/tvDetection";
 
+export interface ImpressionEvent {
+  mediaId: string;
+  mediaName: string;
+  startTime: Date;
+  endTime: Date;
+  duration: number;
+}
+
 interface MediaCarouselProps {
   items: MediaItem[];
   tvCapabilities?: TVCapabilities;
+  onImpressionComplete?: (event: ImpressionEvent) => void;
 }
 
 function getGoogleDriveEmbedUrl(rawUrl: string): string | null {
@@ -26,8 +35,9 @@ function getGoogleDriveEmbedUrl(rawUrl: string): string | null {
   }
 }
 
-export function MediaCarousel({ items, tvCapabilities }: MediaCarouselProps) {
+export function MediaCarousel({ items, tvCapabilities, onImpressionComplete }: MediaCarouselProps) {
   const [current, setCurrent] = useState(0);
+  const slideStartRef = useRef<Date>(new Date());
   const [progress, setProgress] = useState(0);
   const [videoSourceIndex, setVideoSourceIndex] = useState(0);
   const [visible, setVisible] = useState(true);
@@ -52,20 +62,39 @@ export function MediaCarousel({ items, tvCapabilities }: MediaCarouselProps) {
   var videoSources = currentItem && currentItem.type === "video" && !isDriveVideo ? getMediaPlaybackUrls(currentItem.url, "video") : [];
   var currentVideoUrl = videoSources[Math.min(videoSourceIndex, Math.max(videoSources.length - 1, 0))];
 
+  // Track impression when slide changes
+  useEffect(function () {
+    slideStartRef.current = new Date();
+  }, [current]);
+
+  var emitImpression = useCallback(function () {
+    if (!currentItem || !onImpressionComplete) return;
+    var now = new Date();
+    var durationSec = Math.round((now.getTime() - slideStartRef.current.getTime()) / 1000);
+    if (durationSec < 1) return; // ignore sub-second flickers
+    onImpressionComplete({
+      mediaId: currentItem.id,
+      mediaName: currentItem.name,
+      startTime: slideStartRef.current,
+      endTime: now,
+      duration: durationSec,
+    });
+  }, [currentItem, onImpressionComplete]);
+
   useEffect(function () {
     setVideoSourceIndex(0);
   }, [currentItem?.id, currentItem?.url]);
 
   var goToNext = useCallback(function () {
     if (items.length <= 1) return;
-    // Simple fade transition without framer-motion
+    emitImpression();
     setVisible(false);
     setTimeout(function () {
       setCurrent(function (prev) { return (prev + 1) % items.length; });
       setProgress(0);
       setVisible(true);
     }, 300);
-  }, [items.length]);
+  }, [items.length, emitImpression]);
 
   useEffect(function () {
     if (!currentItem) return;

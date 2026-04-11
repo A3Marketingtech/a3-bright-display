@@ -4,6 +4,8 @@ import a3Logo from "@/assets/a3-logo.png";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import type { Advertiser } from "@/lib/types";
+import { startTracking, stopTracking, recordImpression, recordInstantEvent } from "@/lib/impressionTracker";
+import type { ImpressionEvent } from "@/components/display/MediaCarousel";
 
 import { WeatherWidget } from "@/components/display/WeatherWidget";
 import { Clock } from "@/components/display/Clock";
@@ -58,14 +60,58 @@ const Display = () => {
     return unsub;
   }, []);
 
+  // Start/stop tracking on login/logout
+  useEffect(() => {
+    if (currentDriver) {
+      startTracking();
+      recordInstantEvent("driver_login", {
+        driverId: currentDriver.id,
+        driverName: currentDriver.name,
+      });
+    }
+    return () => {
+      if (currentDriver) {
+        recordInstantEvent("driver_logout", {
+          driverId: currentDriver.id,
+          driverName: currentDriver.name,
+        });
+        stopTracking();
+      }
+    };
+  }, [currentDriver]);
+
   const handleLogoutSubmit = useCallback(() => {
     if (currentDriver && logoutPassword === currentDriver.password) {
+      recordInstantEvent("driver_logout", {
+        driverId: currentDriver.id,
+        driverName: currentDriver.name,
+      });
+      stopTracking();
       setLogoutPrompt(false);
       setLogoutPassword("");
       setShowChangePassword(false);
       logout();
     }
   }, [logoutPassword, currentDriver, logout]);
+
+  // Handle impression from carousel
+  const handleImpression = useCallback((event: ImpressionEvent) => {
+    const advertiser = advertisers.find((a) => {
+      const media = mediaItems.find((m) => m.id === event.mediaId);
+      return media?.advertiserId && a.id === media.advertiserId;
+    });
+    recordImpression({
+      mediaId: event.mediaId,
+      mediaName: event.mediaName,
+      advertiserId: advertiser?.id || "",
+      advertiserName: advertiser?.name || "",
+      driverId: currentDriver?.id || "",
+      driverName: currentDriver?.name || "",
+      startTime: event.startTime,
+      endTime: event.endTime,
+      duration: event.duration,
+    });
+  }, [advertisers, mediaItems, currentDriver]);
 
   // Filter out media from expired (non-auto-renew) advertisers
   const expiredAdvertiserIds = useMemo(() => {
@@ -156,7 +202,7 @@ const Display = () => {
           className="relative overflow-hidden"
           style={{ width: "70%", height: "100%", minHeight: 0, minWidth: 0, flexShrink: 0 }}
         >
-          <MediaCarousel items={filteredMedia} tvCapabilities={tvCaps} />
+          <MediaCarousel items={filteredMedia} tvCapabilities={tvCaps} onImpressionComplete={handleImpression} />
         </div>
 
         {/* Right column: News — 30% */}
