@@ -117,7 +117,7 @@ const Display = () => {
           src={currentDriver?.vehiclePhoto || vanIcon}
           alt={currentDriver?.vehiclePhoto ? "Veículo" : "van"}
           className="object-cover rounded-md"
-          style={{ width: "7vh", height: "4vh" }}
+          style={{ width: "9vh", height: "5vh" }}
         />
       </div>
 
