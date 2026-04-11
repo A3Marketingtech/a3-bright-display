@@ -9,6 +9,7 @@ import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
 import { TargetboardTab } from "./TargetboardTab";
 import { AdvertisersTab } from "./AdvertisersTab";
 import type { Advertiser } from "@/lib/types";
+import { Pencil } from "lucide-react";
 interface ManagementPanelProps {
   open: boolean;
   onClose: () => void;
@@ -47,6 +48,10 @@ export function ManagementPanel({
   const [categories, setCategories] = useState<VehicleCategory[]>([]);
   const [advertisers, setAdvertisers] = useState<Advertiser[]>([]);
   const [selectedAdvertiserId, setSelectedAdvertiserId] = useState("");
+  const [editingMedia, setEditingMedia] = useState<MediaItem | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editAdvertiserId, setEditAdvertiserId] = useState("");
+  const [deletingMediaId, setDeletingMediaId] = useState<string | null>(null);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "categories"), (snap) => {
@@ -417,7 +422,9 @@ export function ManagementPanel({
                       Nenhuma mídia adicionada
                     </p>
                   )}
-                  {mediaItems.map((item) => (
+                  {mediaItems.map((item) => {
+                    const advertiserName = advertisers.find((a) => a.id === item.advertiserId)?.name;
+                    return (
                     <div
                       key={item.id}
                       className="flex items-center gap-3 p-3 bg-secondary rounded-lg border border-border hover:border-neon/20 transition-colors"
@@ -433,6 +440,9 @@ export function ManagementPanel({
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-body truncate">{item.name}</p>
+                        {advertiserName && (
+                          <p className="text-[10px] text-neon font-display truncate">{advertiserName}</p>
+                        )}
                         <div className="flex items-center gap-2 mt-0.5">
                           <span
                             className={`text-[10px] font-display font-medium px-1.5 py-0.5 rounded ${
@@ -484,13 +494,108 @@ export function ManagementPanel({
                         />
                       )}
                       <button
-                        onClick={() => onRemoveMedia(item.id)}
+                        onClick={() => {
+                          setEditingMedia(item);
+                          setEditName(item.label || item.name);
+                          setEditAdvertiserId(item.advertiserId || "");
+                        }}
+                        className="text-muted-foreground hover:text-neon transition-colors"
+                        title="Editar"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setDeletingMediaId(item.id)}
                         className="text-muted-foreground hover:text-destructive transition-colors text-sm"
                       >
                         ✕
                       </button>
                     </div>
-                  ))}
+                  );
+                  })}
+
+                  {/* Delete confirmation modal */}
+                  {deletingMediaId && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background/80 backdrop-blur-sm" onClick={() => setDeletingMediaId(null)}>
+                      <div className="bg-card border border-border rounded-xl p-6 max-w-sm w-full mx-4 space-y-4" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="font-display font-bold text-sm">Confirmar exclusão</h3>
+                        <p className="text-sm text-muted-foreground">Tem certeza que deseja excluir esta mídia? Esta ação não pode ser desfeita.</p>
+                        <div className="flex gap-2 justify-end">
+                          <button onClick={() => setDeletingMediaId(null)} className="px-4 py-2 text-sm font-display rounded-lg border border-border hover:bg-secondary transition-colors">Cancelar</button>
+                          <button onClick={async () => { await onRemoveMedia(deletingMediaId); setDeletingMediaId(null); }} className="px-4 py-2 text-sm font-display rounded-lg bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity">Excluir</button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Edit modal */}
+                  {editingMedia && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background/80 backdrop-blur-sm" onClick={() => setEditingMedia(null)}>
+                      <div className="bg-card border border-border rounded-xl p-6 max-w-md w-full mx-4 space-y-4" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="font-display font-bold text-sm">Editar Mídia</h3>
+                        <div className="space-y-3">
+                          <div className="space-y-1">
+                            <label className="text-xs font-display font-medium text-muted-foreground">Nome / Label</label>
+                            <input
+                              type="text"
+                              value={editName}
+                              onChange={(e) => setEditName(e.target.value)}
+                              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm font-body focus:outline-none focus:border-neon/50 transition-colors"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-display font-medium text-muted-foreground">Anunciante</label>
+                            <select
+                              value={editAdvertiserId}
+                              onChange={(e) => setEditAdvertiserId(e.target.value)}
+                              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm font-body focus:outline-none focus:border-neon/50 transition-colors"
+                            >
+                              <option value="">Sem anunciante</option>
+                              {activeAdvertisers.map((a) => (
+                                <option key={a.id} value={a.id}>{a.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                          {/* Show current categories (read-only info) */}
+                          {(editingMedia.categories || []).length > 0 && (
+                            <div className="space-y-1">
+                              <label className="text-xs font-display font-medium text-muted-foreground">Categorias TARGETBOARD</label>
+                              <div className="flex flex-wrap gap-1">
+                                {(editingMedia.categories || []).map((catId) => {
+                                  const cat = categories.find((c) => c.id === catId);
+                                  return cat ? (
+                                    <span key={catId} className="text-[10px] font-display font-semibold px-2 py-1 rounded bg-neon/10 text-neon border border-neon/30">
+                                      {cat.name}
+                                    </span>
+                                  ) : null;
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex gap-2 justify-end">
+                          <button onClick={() => setEditingMedia(null)} className="px-4 py-2 text-sm font-display rounded-lg border border-border hover:bg-secondary transition-colors">Cancelar</button>
+                          <button
+                            onClick={async () => {
+                              try {
+                                await updateDoc(doc(db, "media", editingMedia.id), {
+                                  name: editName,
+                                  label: editName,
+                                  ...(editAdvertiserId ? { advertiserId: editAdvertiserId } : { advertiserId: "" }),
+                                });
+                                setEditingMedia(null);
+                              } catch (err) {
+                                console.error("Erro ao salvar:", err);
+                              }
+                            }}
+                            className="px-4 py-2 text-sm font-display rounded-lg bg-neon text-primary-foreground hover:opacity-90 transition-opacity"
+                          >
+                            Salvar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
