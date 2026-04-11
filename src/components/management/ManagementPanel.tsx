@@ -344,6 +344,22 @@ export function ManagementPanel({
                         Vídeo
                       </button>
                     </div>
+                    {/* Advertiser selector */}
+                    <div className="space-y-1">
+                      <label className="text-xs font-display font-medium text-muted-foreground">
+                        Anunciante
+                      </label>
+                      <select
+                        value={selectedAdvertiserId}
+                        onChange={(e) => setSelectedAdvertiserId(e.target.value)}
+                        className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm font-body focus:outline-none focus:border-neon/50 transition-colors"
+                      >
+                        <option value="">Sem anunciante</option>
+                        {activeAdvertisers.map((a) => (
+                          <option key={a.id} value={a.id}>{a.name}</option>
+                        ))}
+                      </select>
+                    </div>
                     <button
                       onClick={handleAddUrl}
                       disabled={!url}
