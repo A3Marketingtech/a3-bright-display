@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
-import { db } from "@/lib/firebase";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { db, storage } from "@/lib/firebase";
 import {
   collection,
   doc,
@@ -7,6 +7,7 @@ import {
   setDoc,
   deleteDoc,
 } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import type { Driver, VehicleCategory } from "@/lib/types";
 
 export function TargetboardTab() {

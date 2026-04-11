@@ -25,6 +25,7 @@ export interface Driver {
   login: string;
   password: string;
   vehicle: string;
+  vehiclePhoto?: string;
   vin: string;
   categoryId: string;
 }
