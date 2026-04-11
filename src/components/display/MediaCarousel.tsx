@@ -62,20 +62,39 @@ export function MediaCarousel({ items, tvCapabilities, onImpressionComplete }: M
   var videoSources = currentItem && currentItem.type === "video" && !isDriveVideo ? getMediaPlaybackUrls(currentItem.url, "video") : [];
   var currentVideoUrl = videoSources[Math.min(videoSourceIndex, Math.max(videoSources.length - 1, 0))];
 
+  // Track impression when slide changes
+  useEffect(function () {
+    slideStartRef.current = new Date();
+  }, [current]);
+
+  var emitImpression = useCallback(function () {
+    if (!currentItem || !onImpressionComplete) return;
+    var now = new Date();
+    var durationSec = Math.round((now.getTime() - slideStartRef.current.getTime()) / 1000);
+    if (durationSec < 1) return; // ignore sub-second flickers
+    onImpressionComplete({
+      mediaId: currentItem.id,
+      mediaName: currentItem.name,
+      startTime: slideStartRef.current,
+      endTime: now,
+      duration: durationSec,
+    });
+  }, [currentItem, onImpressionComplete]);
+
   useEffect(function () {
     setVideoSourceIndex(0);
   }, [currentItem?.id, currentItem?.url]);
 
   var goToNext = useCallback(function () {
     if (items.length <= 1) return;
-    // Simple fade transition without framer-motion
+    emitImpression();
     setVisible(false);
     setTimeout(function () {
       setCurrent(function (prev) { return (prev + 1) % items.length; });
       setProgress(0);
       setVisible(true);
     }, 300);
-  }, [items.length]);
+  }, [items.length, emitImpression]);
 
   useEffect(function () {
     if (!currentItem) return;
