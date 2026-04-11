@@ -100,9 +100,11 @@ export function ManagementPanel({
       type: mediaType,
       source: resolveMediaSource(url),
       duration: 10,
+      ...(selectedAdvertiserId ? { advertiserId: selectedAdvertiserId } : {}),
     });
     setUrl("");
     setMediaName("");
+    setSelectedAdvertiserId("");
   }, [url, mediaName, mediaType, onAddMedia]);
 
   const compressImage = useCallback((file: File, maxWidth = 1280, quality = 0.7): Promise<string> => {
@@ -172,7 +174,9 @@ export function ManagementPanel({
           type: isVideo ? "video" : "image",
           source: "local",
           duration: isVideo ? 0 : 10,
+          ...(selectedAdvertiserId ? { advertiserId: selectedAdvertiserId } : {}),
         });
+        setSelectedAdvertiserId("");
       } catch (err) {
         console.error("Upload failed:", err);
         alert("Erro no upload. Verifique as permissões do Firebase Storage.");
@@ -204,11 +208,17 @@ export function ManagementPanel({
 
   // News test removed - now handled via backend sync
 
+  const activeAdvertisers = advertisers.filter((a) => {
+    const expired = new Date(a.contractEnd) < new Date();
+    return !expired || a.autoRenew;
+  });
+
   const tabs: { id: Tab; label: string }[] = [
     { id: "add", label: "Adicionar" },
     { id: "media", label: "Mídias" },
     { id: "targetboard", label: "TARGETBOARD" },
     { id: "news", label: "Notícias" },
+    { id: "advertisers", label: "Anunciantes" },
     { id: "settings", label: "Configurações" },
   ];
 
@@ -469,6 +479,8 @@ export function ManagementPanel({
               )}
 
               {tab === "targetboard" && <TargetboardTab />}
+
+              {tab === "advertisers" && <AdvertisersTab />}
 
               {tab === "news" && <NewsStatusPanel />}
 
