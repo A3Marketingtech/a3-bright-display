@@ -18,14 +18,19 @@ export default function AdvertiserLogin() {
     setLoading(true);
 
     try {
-      const q = query(collection(db, "advertisers"), where("email", "==", email.trim()));
-      const snap = await getDocs(q);
+      // Fetch all advertisers and match email case-insensitively
+      const snap = await getDocs(collection(db, "advertisers"));
+      const match = snap.docs.find(
+        (d) => (d.data().email || "").toLowerCase().trim() === email.trim().toLowerCase()
+      );
 
-      if (snap.empty) {
+      if (!match) {
         setError("Email ou senha incorretos");
         setLoading(false);
         return;
       }
+
+      const doc = match;
 
       const doc = snap.docs[0];
       const adv = { id: doc.id, ...doc.data() } as Advertiser;
