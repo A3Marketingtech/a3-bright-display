@@ -113,12 +113,29 @@ const Display = () => {
     });
   }, [advertisers, mediaItems, currentDriver]);
 
-  // Re-evaluate contract expiry in real time (every 60s) so expired ads
-  // disappear without requiring a reload or advertiser data change.
+  // Re-evaluate contract expiry once per day at 15:00 local time.
+  // Initial evaluation happens on mount; subsequent evaluations are scheduled
+  // for the next 3PM (today if not yet past, otherwise tomorrow).
   const [nowTick, setNowTick] = useState(() => Date.now());
   useEffect(() => {
-    const id = setInterval(() => setNowTick(Date.now()), 60_000);
-    return () => clearInterval(id);
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const scheduleNext = () => {
+      const now = new Date();
+      const next = new Date(now);
+      next.setHours(15, 0, 0, 0);
+      if (next.getTime() <= now.getTime()) {
+        next.setDate(next.getDate() + 1);
+      }
+      const delay = next.getTime() - now.getTime();
+      timeoutId = setTimeout(() => {
+        setNowTick(Date.now());
+        scheduleNext();
+      }, delay);
+    };
+
+    scheduleNext();
+    return () => clearTimeout(timeoutId);
   }, []);
 
   // Filter out media from expired (non-auto-renew) advertisers
