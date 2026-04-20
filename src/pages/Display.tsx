@@ -169,7 +169,8 @@ const Display = () => {
           </button>
           <button
             onClick={() => { setLogoutPrompt(true); setLogoutPassword(""); }}
-            className="text-muted-foreground/20 hover:text-muted-foreground text-[clamp(0.7rem,1vw,1.2rem)] transition-colors"
+            className="text-[clamp(0.7rem,1vw,1.2rem)] rounded-lg px-2 py-1 transition-colors hover:opacity-80"
+            style={{ color: "#F5C518", backgroundColor: "rgba(255,255,255,0.15)" }}
             title="Logout"
           >
             ⏻
