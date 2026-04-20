@@ -113,15 +113,31 @@ const Display = () => {
     });
   }, [advertisers, mediaItems, currentDriver]);
 
+  // Re-evaluate contract expiry in real time (every 60s) so expired ads
+  // disappear without requiring a reload or advertiser data change.
+  const [nowTick, setNowTick] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowTick(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
   // Filter out media from expired (non-auto-renew) advertisers
   const expiredAdvertiserIds = useMemo(() => {
-    const now = new Date();
+    const now = new Date(nowTick);
     return new Set(
       advertisers
-        .filter((a) => new Date(a.contractEnd) < now && !a.autoRenew)
+        .filter((a) => {
+          if (a.autoRenew) return false;
+          if (!a.contractEnd) return false;
+          const end = new Date(a.contractEnd);
+          if (isNaN(end.getTime())) return false;
+          // End-of-day: contract is valid through the entire end date
+          end.setHours(23, 59, 59, 999);
+          return end.getTime() < now.getTime();
+        })
         .map((a) => a.id)
     );
-  }, [advertisers]);
+  }, [advertisers, nowTick]);
 
   const filteredMedia = currentDriver
     ? mediaItems
