@@ -27,9 +27,74 @@ export function TargetboardTab() {
   const [dVin, setDVin] = useState("");
   const [dCategory, setDCategory] = useState("");
 
+  // Edit driver state
+  const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
+  const [eName, setEName] = useState("");
+  const [eLogin, setELogin] = useState("");
+  const [ePassword, setEPassword] = useState("");
+  const [eVehicle, setEVehicle] = useState("");
+  const [eVin, setEVin] = useState("");
+  const [eCategory, setECategory] = useState("");
+  const [eVehiclePhoto, setEVehiclePhoto] = useState<File | null>(null);
+  const [eVehiclePhotoPreview, setEVehiclePhotoPreview] = useState("");
+  const [eExistingPhoto, setEExistingPhoto] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+  const editPhotoRef = useRef<HTMLInputElement>(null);
+
   // Category form
   const [cName, setCName] = useState("");
   const [cDesc, setCDesc] = useState("");
+
+  const openEditDriver = useCallback((d: Driver) => {
+    setEditingDriver(d);
+    setEName(d.name || "");
+    setELogin(d.login || "");
+    setEPassword(d.password || "");
+    setEVehicle(d.vehicle || "");
+    setEVin(d.vin || "");
+    setECategory(d.categoryId || "");
+    setEExistingPhoto(d.vehiclePhoto || "");
+    setEVehiclePhoto(null);
+    setEVehiclePhotoPreview("");
+  }, []);
+
+  const closeEditDriver = useCallback(() => {
+    setEditingDriver(null);
+    setEVehiclePhoto(null);
+    setEVehiclePhotoPreview("");
+    if (editPhotoRef.current) editPhotoRef.current.value = "";
+  }, []);
+
+  const saveEditDriver = useCallback(async () => {
+    if (!editingDriver) return;
+    if (!eName || !eLogin || !ePassword || !eCategory) return;
+    setSavingEdit(true);
+    try {
+      let vehiclePhotoUrl = eExistingPhoto;
+      if (eVehiclePhoto) {
+        const ext = eVehiclePhoto.name.split(".").pop() || "jpg";
+        const fileName = `vehicles/${Date.now()}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
+        const storageRef = ref(storage, fileName);
+        await uploadBytesResumable(storageRef, eVehiclePhoto);
+        vehiclePhotoUrl = await getDownloadURL(storageRef);
+      }
+      await setDoc(doc(db, "drivers", editingDriver.id), {
+        name: eName,
+        login: eLogin,
+        password: ePassword,
+        vehicle: eVehicle,
+        vin: eVin,
+        categoryId: eCategory,
+        ...(vehiclePhotoUrl ? { vehiclePhoto: vehiclePhotoUrl } : {}),
+      });
+      closeEditDriver();
+    } catch (err) {
+      console.error("Erro ao editar motorista:", err);
+      alert("Erro ao salvar alterações. Verifique a conexão.");
+    } finally {
+      setSavingEdit(false);
+    }
+  }, [editingDriver, eName, eLogin, ePassword, eVehicle, eVin, eCategory, eVehiclePhoto, eExistingPhoto, closeEditDriver]);
 
   useEffect(() => {
     const unsub1 = onSnapshot(collection(db, "drivers"), (snap) => {
