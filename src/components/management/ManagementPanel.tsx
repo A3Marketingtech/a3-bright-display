@@ -221,7 +221,7 @@ export function ManagementPanel({
   const tabs: { id: Tab; label: string }[] = [
     { id: "add", label: "Adicionar" },
     { id: "media", label: "Mídias" },
-    { id: "targetboard", label: "TARGETBOARD" },
+    { id: "targetboard", label: "Driver Hub" },
     { id: "news", label: "Notícias" },
     { id: "advertisers", label: "Anunciantes" },
     { id: "settings", label: "Configurações" },
@@ -559,7 +559,7 @@ export function ManagementPanel({
                           {/* Show current categories (read-only info) */}
                           {(editingMedia.categories || []).length > 0 && (
                             <div className="space-y-1">
-                              <label className="text-xs font-display font-medium text-muted-foreground">Categorias TARGETBOARD</label>
+                              <label className="text-xs font-display font-medium text-muted-foreground">Categorias Driver Hub</label>
                               <div className="flex flex-wrap gap-1">
                                 {(editingMedia.categories || []).map((catId) => {
                                   const cat = categories.find((c) => c.id === catId);

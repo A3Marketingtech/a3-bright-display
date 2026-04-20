@@ -26,7 +26,7 @@ export function DriverLogin({ onLogin, error }: DriverLoginProps) {
             <img src={a3Logo} alt="A³ Marketing" className="h-32 w-auto object-contain mx-auto" />
           </h1>
           <p className="text-xs text-muted-foreground font-display uppercase tracking-widest">
-            TARGETBOARD
+            DRIVER HUB
           </p>
         </div>
 
