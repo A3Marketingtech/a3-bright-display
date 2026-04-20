@@ -161,7 +161,8 @@ const Display = () => {
           )}
           <button
             onClick={() => setShowChangePassword(true)}
-            className="text-muted-foreground/40 hover:text-muted-foreground text-[clamp(0.6rem,0.8vw,1rem)] transition-colors"
+            className="text-[clamp(0.6rem,0.8vw,1rem)] rounded-lg px-2 py-1 transition-colors hover:opacity-80"
+            style={{ color: "#F5C518", backgroundColor: "rgba(255,255,255,0.15)" }}
             title="Alterar Senha"
           >
             🔑
