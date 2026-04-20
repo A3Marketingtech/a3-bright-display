@@ -161,16 +161,20 @@ const Display = () => {
           )}
           <button
             onClick={() => setShowChangePassword(true)}
-            className="text-[clamp(0.6rem,0.8vw,1rem)] rounded-lg px-2 py-1 transition-colors hover:opacity-80"
-            style={{ color: "#F5C518", backgroundColor: "rgba(255,255,255,0.15)" }}
+            className="text-[clamp(0.6rem,0.8vw,1rem)] rounded-lg px-2 py-1 transition-colors"
+            style={{ color: "#4CAF50", backgroundColor: "rgba(76,175,80,0.15)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(76,175,80,0.30)")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(76,175,80,0.15)")}
             title="Alterar Senha"
           >
             🔑
           </button>
           <button
             onClick={() => { setLogoutPrompt(true); setLogoutPassword(""); }}
-            className="text-[clamp(0.7rem,1vw,1.2rem)] rounded-lg px-2 py-1 transition-colors hover:opacity-80"
-            style={{ color: "#F5C518", backgroundColor: "rgba(255,255,255,0.15)" }}
+            className="text-[clamp(0.7rem,1vw,1.2rem)] rounded-lg px-2 py-1 transition-colors"
+            style={{ color: "#4CAF50", backgroundColor: "rgba(76,175,80,0.15)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(76,175,80,0.30)")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(76,175,80,0.15)")}
             title="Logout"
           >
             ⏻
