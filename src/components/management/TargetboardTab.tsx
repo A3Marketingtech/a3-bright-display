@@ -27,9 +27,74 @@ export function TargetboardTab() {
   const [dVin, setDVin] = useState("");
   const [dCategory, setDCategory] = useState("");
 
+  // Edit driver state
+  const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
+  const [eName, setEName] = useState("");
+  const [eLogin, setELogin] = useState("");
+  const [ePassword, setEPassword] = useState("");
+  const [eVehicle, setEVehicle] = useState("");
+  const [eVin, setEVin] = useState("");
+  const [eCategory, setECategory] = useState("");
+  const [eVehiclePhoto, setEVehiclePhoto] = useState<File | null>(null);
+  const [eVehiclePhotoPreview, setEVehiclePhotoPreview] = useState("");
+  const [eExistingPhoto, setEExistingPhoto] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+  const editPhotoRef = useRef<HTMLInputElement>(null);
+
   // Category form
   const [cName, setCName] = useState("");
   const [cDesc, setCDesc] = useState("");
+
+  const openEditDriver = useCallback((d: Driver) => {
+    setEditingDriver(d);
+    setEName(d.name || "");
+    setELogin(d.login || "");
+    setEPassword(d.password || "");
+    setEVehicle(d.vehicle || "");
+    setEVin(d.vin || "");
+    setECategory(d.categoryId || "");
+    setEExistingPhoto(d.vehiclePhoto || "");
+    setEVehiclePhoto(null);
+    setEVehiclePhotoPreview("");
+  }, []);
+
+  const closeEditDriver = useCallback(() => {
+    setEditingDriver(null);
+    setEVehiclePhoto(null);
+    setEVehiclePhotoPreview("");
+    if (editPhotoRef.current) editPhotoRef.current.value = "";
+  }, []);
+
+  const saveEditDriver = useCallback(async () => {
+    if (!editingDriver) return;
+    if (!eName || !eLogin || !ePassword || !eCategory) return;
+    setSavingEdit(true);
+    try {
+      let vehiclePhotoUrl = eExistingPhoto;
+      if (eVehiclePhoto) {
+        const ext = eVehiclePhoto.name.split(".").pop() || "jpg";
+        const fileName = `vehicles/${Date.now()}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
+        const storageRef = ref(storage, fileName);
+        await uploadBytesResumable(storageRef, eVehiclePhoto);
+        vehiclePhotoUrl = await getDownloadURL(storageRef);
+      }
+      await setDoc(doc(db, "drivers", editingDriver.id), {
+        name: eName,
+        login: eLogin,
+        password: ePassword,
+        vehicle: eVehicle,
+        vin: eVin,
+        categoryId: eCategory,
+        ...(vehiclePhotoUrl ? { vehiclePhoto: vehiclePhotoUrl } : {}),
+      });
+      closeEditDriver();
+    } catch (err) {
+      console.error("Erro ao editar motorista:", err);
+      alert("Erro ao salvar alterações. Verifique a conexão.");
+    } finally {
+      setSavingEdit(false);
+    }
+  }, [editingDriver, eName, eLogin, ePassword, eVehicle, eVin, eCategory, eVehiclePhoto, eExistingPhoto, closeEditDriver]);
 
   useEffect(() => {
     const unsub1 = onSnapshot(collection(db, "drivers"), (snap) => {
@@ -215,10 +280,115 @@ export function TargetboardTab() {
                     {d.vehicle} • {cat?.name || "Sem categoria"} • Login: {d.login} • Senha: {d.password}
                   </p>
                 </div>
-                <button onClick={() => removeDriver(d.id)} className="text-muted-foreground hover:text-destructive transition-colors text-sm">✕</button>
+                <button
+                  onClick={() => openEditDriver(d)}
+                  className="text-muted-foreground hover:text-neon transition-colors text-sm"
+                  title="Editar motorista"
+                >
+                  ✏️
+                </button>
+                <button onClick={() => removeDriver(d.id)} className="text-muted-foreground hover:text-destructive transition-colors text-sm" title="Remover motorista">✕</button>
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Edit Driver Modal */}
+      {editingDriver && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: "rgba(10,10,10,0.85)" }}
+          onClick={closeEditDriver}
+        >
+          <div
+            className="bg-card border border-border rounded-2xl p-5 w-full max-w-md max-h-[90vh] overflow-y-auto space-y-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-base font-display font-bold flex items-center gap-2">
+              <span style={{ color: "#4CAF50" }}>✏️</span> Editar Motorista
+            </h3>
+
+            <input placeholder="Nome completo" value={eName} onChange={(e) => setEName(e.target.value)} className={inputClass} />
+            <input placeholder="Login (usuário)" value={eLogin} onChange={(e) => setELogin(e.target.value)} className={inputClass} />
+            <input type="text" placeholder="Senha" value={ePassword} onChange={(e) => setEPassword(e.target.value)} className={inputClass} />
+            <input placeholder="Modelo do veículo" value={eVehicle} onChange={(e) => setEVehicle(e.target.value)} className={inputClass} />
+
+            {/* Foto do veículo */}
+            <div className="space-y-2">
+              <label className="text-xs font-display font-medium text-muted-foreground">Foto do Veículo</label>
+              <input
+                ref={editPhotoRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setEVehiclePhoto(file);
+                    setEVehiclePhotoPreview(URL.createObjectURL(file));
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => editPhotoRef.current?.click()}
+                className="w-full border-2 border-dashed border-border hover:border-neon/30 rounded-xl py-3 flex flex-col items-center gap-1 transition-colors"
+              >
+                {eVehiclePhotoPreview ? (
+                  <img src={eVehiclePhotoPreview} alt="Nova foto" className="h-20 w-auto rounded-lg object-cover" />
+                ) : eExistingPhoto ? (
+                  <div className="flex flex-col items-center gap-1">
+                    <img src={eExistingPhoto} alt="Foto atual" className="h-20 w-auto rounded-lg object-cover" />
+                    <span className="text-[10px] text-muted-foreground">Clique para substituir</span>
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-lg">📷</span>
+                    <span className="text-xs text-muted-foreground">Clique para selecionar foto</span>
+                  </>
+                )}
+              </button>
+              {eVehiclePhoto && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEVehiclePhoto(null);
+                    setEVehiclePhotoPreview("");
+                    if (editPhotoRef.current) editPhotoRef.current.value = "";
+                  }}
+                  className="text-xs text-destructive hover:underline"
+                >
+                  Cancelar nova foto
+                </button>
+              )}
+            </div>
+
+            <input placeholder="VIN number" value={eVin} onChange={(e) => setEVin(e.target.value)} className={inputClass} />
+            <select value={eCategory} onChange={(e) => setECategory(e.target.value)} className={inputClass}>
+              <option value="">Selecione a categoria</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={closeEditDriver}
+                className="flex-1 border border-border text-foreground font-display font-semibold py-2.5 rounded-lg text-sm hover:bg-secondary transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={saveEditDriver}
+                disabled={savingEdit || !eName || !eLogin || !ePassword || !eCategory}
+                className="flex-1 font-display font-semibold py-2.5 rounded-lg text-sm transition-opacity disabled:opacity-40 hover:opacity-90"
+                style={{ backgroundColor: "#4CAF50", color: "#0a0a0a" }}
+              >
+                {savingEdit ? "Salvando..." : "Salvar alterações"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
