@@ -156,9 +156,16 @@ const Display = () => {
     );
   }, [advertisers, nowTick]);
 
+  const driverCategoryIds = currentDriver
+    ? (currentDriver.categoryIds && currentDriver.categoryIds.length > 0
+        ? currentDriver.categoryIds
+        : currentDriver.categoryId
+        ? [currentDriver.categoryId]
+        : [])
+    : [];
   const filteredMedia = currentDriver
     ? mediaItems
-        .filter((item) => (item.categories || []).includes(currentDriver.categoryId))
+        .filter((item) => (item.categories || []).some((c) => driverCategoryIds.includes(c)))
         .filter((item) => !item.advertiserId || !expiredAdvertiserIds.has(item.advertiserId))
     : [];
 

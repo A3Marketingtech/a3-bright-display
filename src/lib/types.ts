@@ -28,7 +28,9 @@ export interface Driver {
   vehicle: string;
   vehiclePhoto?: string;
   vin: string;
-  categoryId: string;
+  /** @deprecated use categoryIds */
+  categoryId?: string;
+  categoryIds?: string[];
 }
 
 export interface VehicleCategory {
