@@ -25,7 +25,7 @@ export function TargetboardTab() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const vehiclePhotoRef = useRef<HTMLInputElement>(null);
   const [dVin, setDVin] = useState("");
-  const [dCategory, setDCategory] = useState("");
+  const [dCategories, setDCategories] = useState<string[]>([]);
 
   // Edit driver state
   const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
@@ -34,7 +34,7 @@ export function TargetboardTab() {
   const [ePassword, setEPassword] = useState("");
   const [eVehicle, setEVehicle] = useState("");
   const [eVin, setEVin] = useState("");
-  const [eCategory, setECategory] = useState("");
+  const [eCategories, setECategories] = useState<string[]>([]);
   const [eVehiclePhoto, setEVehiclePhoto] = useState<File | null>(null);
   const [eVehiclePhotoPreview, setEVehiclePhotoPreview] = useState("");
   const [eExistingPhoto, setEExistingPhoto] = useState("");
@@ -52,7 +52,13 @@ export function TargetboardTab() {
     setEPassword(d.password || "");
     setEVehicle(d.vehicle || "");
     setEVin(d.vin || "");
-    setECategory(d.categoryId || "");
+    const initial =
+      d.categoryIds && d.categoryIds.length > 0
+        ? d.categoryIds
+        : d.categoryId
+        ? [d.categoryId]
+        : [];
+    setECategories(initial);
     setEExistingPhoto(d.vehiclePhoto || "");
     setEVehiclePhoto(null);
     setEVehiclePhotoPreview("");
