@@ -73,7 +73,7 @@ export function TargetboardTab() {
 
   const saveEditDriver = useCallback(async () => {
     if (!editingDriver) return;
-    if (!eName || !eLogin || !ePassword || !eCategory) return;
+    if (!eName || !eLogin || !ePassword || eCategories.length === 0) return;
     setSavingEdit(true);
     try {
       let vehiclePhotoUrl = eExistingPhoto;
@@ -90,7 +90,8 @@ export function TargetboardTab() {
         password: ePassword,
         vehicle: eVehicle,
         vin: eVin,
-        categoryId: eCategory,
+        categoryIds: eCategories,
+        categoryId: eCategories[0] || "",
         ...(vehiclePhotoUrl ? { vehiclePhoto: vehiclePhotoUrl } : {}),
       });
       closeEditDriver();
@@ -100,7 +101,7 @@ export function TargetboardTab() {
     } finally {
       setSavingEdit(false);
     }
-  }, [editingDriver, eName, eLogin, ePassword, eVehicle, eVin, eCategory, eVehiclePhoto, eExistingPhoto, closeEditDriver]);
+  }, [editingDriver, eName, eLogin, ePassword, eVehicle, eVin, eCategories, eVehiclePhoto, eExistingPhoto, closeEditDriver]);
 
   useEffect(() => {
     const unsub1 = onSnapshot(collection(db, "drivers"), (snap) => {
@@ -117,7 +118,7 @@ export function TargetboardTab() {
   }, []);
 
   const addDriver = useCallback(async () => {
-    if (!dName || !dLogin || !dPassword || !dCategory) return;
+    if (!dName || !dLogin || !dPassword || dCategories.length === 0) return;
     setUploadingPhoto(true);
     try {
       let vehiclePhotoUrl = "";
@@ -131,10 +132,10 @@ export function TargetboardTab() {
       const id = crypto.randomUUID();
       await setDoc(doc(db, "drivers", id), {
         name: dName, login: dLogin, password: dPassword,
-        vehicle: dVehicle, vin: dVin, categoryId: dCategory,
+        vehicle: dVehicle, vin: dVin, categoryIds: dCategories, categoryId: dCategories[0] || "",
         ...(vehiclePhotoUrl ? { vehiclePhoto: vehiclePhotoUrl } : {}),
       });
-      setDName(""); setDLogin(""); setDPassword(""); setDVehicle(""); setDVin(""); setDCategory("");
+      setDName(""); setDLogin(""); setDPassword(""); setDVehicle(""); setDVin(""); setDCategories([]);
       setDVehiclePhoto(null); setDVehiclePhotoPreview("");
     } catch (err) {
       console.error("Erro ao adicionar motorista:", err);
@@ -142,7 +143,7 @@ export function TargetboardTab() {
     } finally {
       setUploadingPhoto(false);
     }
-  }, [dName, dLogin, dPassword, dVehicle, dVin, dCategory, dVehiclePhoto]);
+  }, [dName, dLogin, dPassword, dVehicle, dVin, dCategories, dVehiclePhoto]);
 
   const removeDriver = useCallback(async (id: string) => {
     await deleteDoc(doc(db, "drivers", id));
