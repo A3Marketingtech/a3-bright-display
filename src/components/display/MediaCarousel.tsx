@@ -194,22 +194,6 @@ export function MediaCarousel({ items, tvCapabilities, onImpressionComplete }: M
         )}
       </div>
 
-      {currentItem.label && (
-        <div
-          className="absolute rounded-md"
-          style={{
-            bottom: "4vh",
-            left: "1vw",
-            backgroundColor: "rgba(10,10,10,0.7)",
-            padding: "0.3vh 0.8vw",
-          }}
-        >
-          <span className="text-[clamp(0.55rem,0.7vw,0.85rem)] font-body" style={{ color: "rgba(255,255,255,0.8)" }}>
-            {currentItem.label}
-          </span>
-        </div>
-      )}
-
       {/* Progress bar */}
       <div
         className="absolute overflow-hidden rounded-full"
