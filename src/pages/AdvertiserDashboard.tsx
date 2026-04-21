@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
+import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
 import a3Logo from "@/assets/a3-logo.png";
 import type { Advertiser, MediaItem } from "@/lib/types";
 import { I18nProvider, useI18n } from "@/lib/i18n";
@@ -18,6 +18,25 @@ interface Impression {
   sessionId: string;
 }
 
+interface DriverEvent {
+  eventType: string;
+  sessionId: string;
+  driverId: string;
+  driverName: string;
+  timestamp: Timestamp;
+}
+
+interface ActiveDriverSession {
+  driverId: string;
+  driverName: string;
+  sessionId: string;
+  loginAt: Date;
+}
+
+// A driver is considered "active / On Trip" if their most recent event
+// is a driver_login (no subsequent logout) within the last 12 hours.
+const ACTIVE_SESSION_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+
 function DashboardContent() {
   const navigate = useNavigate();
   const { lang, toggleLang, t } = useI18n();
@@ -25,7 +44,14 @@ function DashboardContent() {
   const [advertiser, setAdvertiser] = useState<Advertiser | null>(null);
   const [impressions, setImpressions] = useState<Impression[]>([]);
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+  const [driverEvents, setDriverEvents] = useState<DriverEvent[]>([]);
   const [period, setPeriod] = useState<"today" | "7days" | "30days">("today");
+  // Tick every 30s to expire stale active sessions in the UI
+  const [, setNowTick] = useState(Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowTick(Date.now()), 30000);
+    return () => clearInterval(id);
+  }, []);
 
   // Load advertiser from session
   useEffect(() => {
@@ -56,20 +82,38 @@ function DashboardContent() {
     return unsub;
   }, [advertiser]);
 
-  // Subscribe to media for this advertiser
+  // Subscribe to media for this advertiser.
+  // We listen to the full media collection and filter client-side so we
+  // catch any docs whose advertiserId field stores the same value as the
+  // logged-in advertiser id (Firestore doc id).
   useEffect(() => {
     if (!advertiser) return;
-    const q = query(
-      collection(db, "media"),
-      where("advertiserId", "==", advertiser.id)
-    );
-    const unsub = onSnapshot(q, (snap) => {
+    const unsub = onSnapshot(collection(db, "media"), (snap) => {
       const list: MediaItem[] = [];
-      snap.forEach((d) => list.push({ id: d.id, ...d.data() } as MediaItem));
+      snap.forEach((d) => {
+        const data = d.data() as MediaItem;
+        if (data.advertiserId === advertiser.id) {
+          list.push({ ...data, id: d.id });
+        }
+      });
       setMediaItems(list);
     });
     return unsub;
   }, [advertiser]);
+
+  // Subscribe to driver login/logout events to determine "On Trip" drivers in real time
+  useEffect(() => {
+    const q = query(
+      collection(db, "events"),
+      where("eventType", "in", ["driver_login", "driver_logout"])
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      const list: DriverEvent[] = [];
+      snap.forEach((d) => list.push(d.data() as DriverEvent));
+      setDriverEvents(list);
+    });
+    return unsub;
+  }, []);
 
   const handleLogout = useCallback(() => {
     sessionStorage.removeItem("advertiser");
@@ -128,21 +172,61 @@ function DashboardContent() {
     return counts;
   }, [impressions]);
 
-  // Active sessions (recent impressions within 2 minutes)
-  const activeSessions = useMemo(() => {
-    const twoMinAgo = new Date(Date.now() - 2 * 60 * 1000);
-    const sessionMap = new Map<string, Impression>();
-    impressions.forEach((imp) => {
-      const date = imp.endTime?.toDate ? imp.endTime.toDate() : new Date();
-      if (date >= twoMinAgo) {
-        const existing = sessionMap.get(imp.sessionId);
-        if (!existing || (imp.endTime?.toDate?.() || 0) > (existing.endTime?.toDate?.() || 0)) {
-          sessionMap.set(imp.sessionId, imp);
-        }
+  // Active "On Trip" drivers — based on driver_login events with no subsequent
+  // driver_logout for the same sessionId. A session also expires after
+  // ACTIVE_SESSION_MAX_AGE_MS to avoid showing stale sessions.
+  const activeDrivers = useMemo<ActiveDriverSession[]>(() => {
+    const now = Date.now();
+    // Group latest event per sessionId
+    const lastBySession = new Map<string, DriverEvent>();
+    driverEvents.forEach((ev) => {
+      const ts = ev.timestamp?.toDate ? ev.timestamp.toDate().getTime() : 0;
+      const existing = lastBySession.get(ev.sessionId);
+      const existingTs = existing?.timestamp?.toDate ? existing.timestamp.toDate().getTime() : 0;
+      if (!existing || ts > existingTs) {
+        lastBySession.set(ev.sessionId, ev);
       }
     });
-    return Array.from(sessionMap.values());
-  }, [impressions]);
+
+    // Keep only sessions whose latest event is a login and is fresh
+    const active: ActiveDriverSession[] = [];
+    const seenDrivers = new Set<string>();
+    Array.from(lastBySession.values())
+      .filter((ev) => ev.eventType === "driver_login")
+      .forEach((ev) => {
+        const loginAt = ev.timestamp?.toDate ? ev.timestamp.toDate() : new Date(0);
+        if (now - loginAt.getTime() > ACTIVE_SESSION_MAX_AGE_MS) return;
+        if (seenDrivers.has(ev.driverId)) return;
+        seenDrivers.add(ev.driverId);
+        active.push({
+          driverId: ev.driverId,
+          driverName: ev.driverName,
+          sessionId: ev.sessionId,
+          loginAt,
+        });
+      });
+    return active;
+  }, [driverEvents]);
+
+  // For each active driver, find the most recent media this advertiser is showing them
+  const activeSessions = useMemo(() => {
+    return activeDrivers.map((drv) => {
+      // Find most recent impression for this driver from current advertiser
+      const lastImp = impressions
+        .filter((imp) => imp.driverId === drv.driverId)
+        .sort((a, b) => {
+          const aT = a.endTime?.toDate ? a.endTime.toDate().getTime() : 0;
+          const bT = b.endTime?.toDate ? b.endTime.toDate().getTime() : 0;
+          return bT - aT;
+        })[0];
+      return {
+        driverId: drv.driverId,
+        driverName: drv.driverName,
+        sessionId: drv.sessionId,
+        mediaName: lastImp?.mediaName ?? "—",
+      };
+    });
+  }, [activeDrivers, impressions]);
 
   const isContractActive = advertiser
     ? (() => {
