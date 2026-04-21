@@ -416,12 +416,34 @@ export function TargetboardTab() {
             </div>
 
             <input placeholder="VIN number" value={eVin} onChange={(e) => setEVin(e.target.value)} className={inputClass} />
-            <select value={eCategory} onChange={(e) => setECategory(e.target.value)} className={inputClass}>
-              <option value="">Selecione a categoria</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
+            <div className="space-y-2">
+              <label className="text-xs font-display font-medium text-muted-foreground">Categorias (selecione uma ou mais)</label>
+              <div className="flex flex-wrap gap-2">
+                {categories.map((c) => {
+                  const checked = eCategories.includes(c.id);
+                  return (
+                    <label
+                      key={c.id}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs cursor-pointer transition-colors ${
+                        checked ? "bg-neon/15 border-neon text-foreground" : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="accent-neon"
+                        checked={checked}
+                        onChange={(e) =>
+                          setECategories((prev) =>
+                            e.target.checked ? [...prev, c.id] : prev.filter((x) => x !== c.id)
+                          )
+                        }
+                      />
+                      {c.name}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
 
             <div className="flex gap-2 pt-2">
               <button
@@ -432,7 +454,7 @@ export function TargetboardTab() {
               </button>
               <button
                 onClick={saveEditDriver}
-                disabled={savingEdit || !eName || !eLogin || !ePassword || !eCategory}
+                disabled={savingEdit || !eName || !eLogin || !ePassword || eCategories.length === 0}
                 className="flex-1 font-display font-semibold py-2.5 rounded-lg text-sm transition-opacity disabled:opacity-40 hover:opacity-90"
                 style={{ backgroundColor: "#4CAF50", color: "#0a0a0a" }}
               >
