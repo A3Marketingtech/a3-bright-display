@@ -363,7 +363,14 @@ function DashboardContent() {
             <p className="text-sm text-muted-foreground">{t("media.noMedia")}</p>
           ) : (
             <div className="grid gap-2 sm:grid-cols-2">
-              {mediaItems.map((item) => (
+              {mediaItems.map((item) => {
+                const ext = (() => {
+                  const m = (item.url || "").split("?")[0].match(/\.([a-zA-Z0-9]+)$/);
+                  const raw = m ? m[1].toLowerCase() : (item.type === "video" ? "mp4" : "jpg");
+                  if (raw === "jpeg") return "JPG";
+                  return raw.toUpperCase();
+                })();
+                return (
                 <div key={item.id} className="flex gap-3 rounded-lg bg-background/50 p-3 border border-border/50">
                   {/* Thumbnail */}
                   {item.type === "image" ? (
@@ -378,7 +385,12 @@ function DashboardContent() {
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-display font-semibold truncate">{item.name}</p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm font-display font-semibold truncate">{item.label || item.name}</p>
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-secondary text-muted-foreground flex-shrink-0">
+                        {ext}
+                      </span>
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       {mediaImpressionCounts[item.id] || 0} {t("media.impressions")}
                     </p>
