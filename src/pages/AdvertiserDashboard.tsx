@@ -145,7 +145,13 @@ function DashboardContent() {
   }, [impressions]);
 
   const isContractActive = advertiser
-    ? new Date(advertiser.contractEnd) >= new Date() || advertiser.autoRenew
+    ? (() => {
+        if (advertiser.autoRenew) return true;
+        const end = new Date(advertiser.contractEnd);
+        if (isNaN(end.getTime())) return false;
+        end.setHours(23, 59, 59, 999);
+        return end.getTime() >= Date.now();
+      })()
     : false;
 
   // Max for chart bar scaling

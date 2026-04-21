@@ -214,7 +214,10 @@ export function ManagementPanel({
   // News test removed - now handled via backend sync
 
   const activeAdvertisers = advertisers.filter((a) => {
-    const expired = new Date(a.contractEnd) < new Date();
+    const end = new Date(a.contractEnd);
+    if (isNaN(end.getTime())) return a.autoRenew;
+    end.setHours(23, 59, 59, 999);
+    const expired = end.getTime() < Date.now();
     return !expired || a.autoRenew;
   });
 
