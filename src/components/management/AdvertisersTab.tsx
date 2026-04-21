@@ -80,7 +80,13 @@ export function AdvertisersTab() {
     await deleteDoc(doc(db, "advertisers", id));
   };
 
-  const isExpired = (endDate: string) => new Date(endDate) < new Date();
+  const isExpired = (endDate: string) => {
+    const end = new Date(endDate);
+    if (isNaN(end.getTime())) return false;
+    // Contract valid through entire end date — compare by day only
+    end.setHours(23, 59, 59, 999);
+    return end.getTime() < Date.now();
+  };
 
   const getStatus = (adv: Advertiser) => {
     if (!isExpired(adv.contractEnd)) return "active";
