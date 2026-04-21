@@ -258,16 +258,38 @@ export function TargetboardTab() {
           </div>
 
           <input placeholder="VIN number" value={dVin} onChange={(e) => setDVin(e.target.value)} className={inputClass} />
-          <select value={dCategory} onChange={(e) => setDCategory(e.target.value)} className={inputClass}>
-            <option value="">Selecione a categoria</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
+          <div className="space-y-2">
+            <label className="text-xs font-display font-medium text-muted-foreground">Categorias (selecione uma ou mais)</label>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((c) => {
+                const checked = dCategories.includes(c.id);
+                return (
+                  <label
+                    key={c.id}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs cursor-pointer transition-colors ${
+                      checked ? "bg-neon/15 border-neon text-foreground" : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="accent-neon"
+                      checked={checked}
+                      onChange={(e) =>
+                        setDCategories((prev) =>
+                          e.target.checked ? [...prev, c.id] : prev.filter((x) => x !== c.id)
+                        )
+                      }
+                    />
+                    {c.name}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
           {categories.length === 0 && (
             <p className="text-xs text-destructive">Cadastre categorias antes de adicionar motoristas.</p>
           )}
-          <button onClick={addDriver} disabled={!dName || !dLogin || !dPassword || !dCategory || uploadingPhoto} className={btnClass}>
+          <button onClick={addDriver} disabled={!dName || !dLogin || !dPassword || dCategories.length === 0 || uploadingPhoto} className={btnClass}>
             {uploadingPhoto ? "Enviando..." : "Adicionar Motorista"}
           </button>
 
@@ -275,7 +297,15 @@ export function TargetboardTab() {
           <h3 className="text-sm font-display font-semibold">Motoristas cadastrados</h3>
           {drivers.length === 0 && <p className="text-xs text-muted-foreground">Nenhum motorista</p>}
           {drivers.map((d) => {
-            const cat = categories.find((c) => c.id === d.categoryId);
+            const driverCatIds =
+              d.categoryIds && d.categoryIds.length > 0
+                ? d.categoryIds
+                : d.categoryId
+                ? [d.categoryId]
+                : [];
+            const driverCats = driverCatIds
+              .map((id) => categories.find((c) => c.id === id))
+              .filter(Boolean) as VehicleCategory[];
             return (
               <div key={d.id} className="flex items-center gap-3 p-3 bg-secondary rounded-lg border border-border">
                 {d.vehiclePhoto && (
@@ -283,8 +313,22 @@ export function TargetboardTab() {
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-body font-medium">{d.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {d.vehicle} • {cat?.name || "Sem categoria"} • Login: {d.login} • Senha: {d.password}
+                  <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                    {driverCats.length > 0 ? (
+                      driverCats.map((c) => (
+                        <span
+                          key={c.id}
+                          className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-display font-semibold bg-neon/15 text-neon border border-neon/30"
+                        >
+                          {c.name}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-[10px] text-muted-foreground">Sem categoria</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {d.vehicle} • Login: {d.login} • Senha: {d.password}
                   </p>
                 </div>
                 <button
