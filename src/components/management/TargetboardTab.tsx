@@ -280,7 +280,14 @@ export function TargetboardTab() {
                     {d.vehicle} • {cat?.name || "Sem categoria"} • Login: {d.login} • Senha: {d.password}
                   </p>
                 </div>
-                <button onClick={() => removeDriver(d.id)} className="text-muted-foreground hover:text-destructive transition-colors text-sm">✕</button>
+                <button
+                  onClick={() => openEditDriver(d)}
+                  className="text-muted-foreground hover:text-neon transition-colors text-sm"
+                  title="Editar motorista"
+                >
+                  ✏️
+                </button>
+                <button onClick={() => removeDriver(d.id)} className="text-muted-foreground hover:text-destructive transition-colors text-sm" title="Remover motorista">✕</button>
               </div>
             );
           })}
