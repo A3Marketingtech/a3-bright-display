@@ -15,6 +15,7 @@ interface MediaCarouselProps {
   items: MediaItem[];
   tvCapabilities?: TVCapabilities;
   onImpressionComplete?: (event: ImpressionEvent) => void;
+  onCurrentItemChange?: (item: MediaItem | null) => void;
 }
 
 function getGoogleDriveEmbedUrl(rawUrl: string): string | null {
