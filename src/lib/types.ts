@@ -9,6 +9,10 @@ export interface MediaItem {
   order: number;
   categories?: string[]; // array of category IDs
   advertiserId?: string; // linked advertiser
+  couponDiscount?: string; // ex: "10% OFF"
+  couponExpiry?: string;   // ex: "24h", "7 dias"
+  couponUrl?: string;      // generated URL
+  couponQRCode?: string;   // base64 PNG data URL
 }
 
 export interface AppSettings {

@@ -15,6 +15,7 @@ interface MediaCarouselProps {
   items: MediaItem[];
   tvCapabilities?: TVCapabilities;
   onImpressionComplete?: (event: ImpressionEvent) => void;
+  onCurrentItemChange?: (item: MediaItem | null) => void;
 }
 
 function getGoogleDriveEmbedUrl(rawUrl: string): string | null {
@@ -35,7 +36,7 @@ function getGoogleDriveEmbedUrl(rawUrl: string): string | null {
   }
 }
 
-export function MediaCarousel({ items, tvCapabilities, onImpressionComplete }: MediaCarouselProps) {
+export function MediaCarousel({ items, tvCapabilities, onImpressionComplete, onCurrentItemChange }: MediaCarouselProps) {
   const [current, setCurrent] = useState(0);
   const slideStartRef = useRef<Date>(new Date());
   const [progress, setProgress] = useState(0);
@@ -65,7 +66,8 @@ export function MediaCarousel({ items, tvCapabilities, onImpressionComplete }: M
   // Track impression when slide changes
   useEffect(function () {
     slideStartRef.current = new Date();
-  }, [current]);
+    if (onCurrentItemChange) onCurrentItemChange(currentItem || null);
+  }, [current, currentItem, onCurrentItemChange]);
 
   var emitImpression = useCallback(function () {
     if (!currentItem || !onImpressionComplete) return;

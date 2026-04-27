@@ -10,6 +10,7 @@ import { TargetboardTab } from "./TargetboardTab";
 import { AdvertisersTab } from "./AdvertisersTab";
 import type { Advertiser } from "@/lib/types";
 import { Pencil } from "lucide-react";
+import { buildCouponUrl, generateCouponQRCode } from "@/lib/coupon";
 interface ManagementPanelProps {
   open: boolean;
   onClose: () => void;
@@ -51,7 +52,12 @@ export function ManagementPanel({
   const [editingMedia, setEditingMedia] = useState<MediaItem | null>(null);
   const [editName, setEditName] = useState("");
   const [editAdvertiserId, setEditAdvertiserId] = useState("");
+  const [editCouponDiscount, setEditCouponDiscount] = useState("");
+  const [editCouponExpiry, setEditCouponExpiry] = useState("");
   const [deletingMediaId, setDeletingMediaId] = useState<string | null>(null);
+  const [couponDiscount, setCouponDiscount] = useState("");
+  const [couponExpiry, setCouponExpiry] = useState("");
+  const [generatingQrId, setGeneratingQrId] = useState<string | null>(null);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "categories"), (snap) => {
@@ -106,11 +112,15 @@ export function ManagementPanel({
       source: resolveMediaSource(url),
       duration: 10,
       ...(selectedAdvertiserId ? { advertiserId: selectedAdvertiserId } : {}),
+      ...(couponDiscount.trim() ? { couponDiscount: couponDiscount.trim() } : {}),
+      ...(couponExpiry.trim() ? { couponExpiry: couponExpiry.trim() } : {}),
     });
     setUrl("");
     setMediaName("");
     setSelectedAdvertiserId("");
-  }, [url, mediaName, mediaType, onAddMedia]);
+    setCouponDiscount("");
+    setCouponExpiry("");
+  }, [url, mediaName, mediaType, onAddMedia, selectedAdvertiserId, couponDiscount, couponExpiry]);
 
   const compressImage = useCallback((file: File, maxWidth = 1280, quality = 0.7): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -180,8 +190,12 @@ export function ManagementPanel({
           source: "local",
           duration: isVideo ? 0 : 10,
           ...(selectedAdvertiserId ? { advertiserId: selectedAdvertiserId } : {}),
+          ...(couponDiscount.trim() ? { couponDiscount: couponDiscount.trim() } : {}),
+          ...(couponExpiry.trim() ? { couponExpiry: couponExpiry.trim() } : {}),
         });
         setSelectedAdvertiserId("");
+        setCouponDiscount("");
+        setCouponExpiry("");
       } catch (err) {
         console.error("Upload failed:", err);
         alert("Erro no upload. Verifique as permissões do Firebase Storage.");
@@ -191,7 +205,7 @@ export function ManagementPanel({
         if (fileInputRef.current) fileInputRef.current.value = "";
       }
     },
-    [onAddMedia]
+    [onAddMedia, selectedAdvertiserId, couponDiscount, couponExpiry]
   );
 
   const handleTestWeather = async () => {
@@ -243,6 +257,24 @@ export function ManagementPanel({
       setTimeout(() => setSavedCategoryKey((prev) => (prev === key ? null : prev)), 1200);
     } catch (err) {
       console.error("Erro ao salvar categoria:", err);
+    }
+  }, []);
+
+  const handleGenerateQR = useCallback(async (item: MediaItem) => {
+    if (!item.couponDiscount || !item.couponExpiry) return;
+    setGeneratingQrId(item.id);
+    try {
+      const url = buildCouponUrl(item.id);
+      const qr = await generateCouponQRCode(url);
+      await updateDoc(doc(db, "media", item.id), {
+        couponUrl: url,
+        couponQRCode: qr,
+      });
+    } catch (err) {
+      console.error("Erro ao gerar QR Code:", err);
+      alert("Erro ao gerar QR Code.");
+    } finally {
+      setGeneratingQrId(null);
     }
   }, []);
 
@@ -368,6 +400,28 @@ export function ManagementPanel({
                         ))}
                       </select>
                     </div>
+                    {/* Coupon fields (shared with Upload below) */}
+                    <div className="space-y-2 p-3 rounded-lg border border-dashed border-border bg-secondary/30">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-display font-semibold">
+                        🎟️ Cupom (opcional) — aplica também ao upload abaixo
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          placeholder='Desconto (ex: "10% OFF")'
+                          value={couponDiscount}
+                          onChange={(e) => setCouponDiscount(e.target.value)}
+                          className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-xs font-body focus:outline-none focus:border-neon/50 transition-colors"
+                        />
+                        <input
+                          type="text"
+                          placeholder='Validade (ex: "24h", "7 dias")'
+                          value={couponExpiry}
+                          onChange={(e) => setCouponExpiry(e.target.value)}
+                          className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-xs font-body focus:outline-none focus:border-neon/50 transition-colors"
+                        />
+                      </div>
+                    </div>
                     <button
                       onClick={handleAddUrl}
                       disabled={!url}
@@ -482,6 +536,68 @@ export function ManagementPanel({
                             );
                           })}
                         </div>
+                        {/* QR Code coupon section */}
+                        {(() => {
+                          const hasFields = !!(item.couponDiscount && item.couponExpiry);
+                          const hasQR = !!item.couponQRCode;
+                          const status = !hasFields ? "none" : hasQR ? "active" : "ready";
+                          const statusLabel =
+                            status === "none"
+                              ? "⚪ Sem QR Code"
+                              : status === "ready"
+                              ? "🟡 Pronto para gerar"
+                              : "✅ QR Code ativo";
+                          return (
+                            <div className="mt-2 space-y-1.5">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-[10px] font-display font-semibold text-muted-foreground">
+                                  {statusLabel}
+                                </span>
+                                {item.couponDiscount && (
+                                  <span className="text-[10px] font-display font-semibold px-1.5 py-0.5 rounded bg-neon/10 text-neon">
+                                    {item.couponDiscount}
+                                  </span>
+                                )}
+                                {item.couponExpiry && (
+                                  <span className="text-[10px] font-display text-muted-foreground">
+                                    • {item.couponExpiry}
+                                  </span>
+                                )}
+                              </div>
+                              {hasFields && (
+                                <button
+                                  onClick={() => handleGenerateQR(item)}
+                                  disabled={generatingQrId === item.id}
+                                  className="text-[10px] font-display font-semibold px-2 py-1 rounded bg-neon text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
+                                >
+                                  {generatingQrId === item.id
+                                    ? "Gerando…"
+                                    : hasQR
+                                    ? "Regenerar QR Code"
+                                    : "Gerar QR Code"}
+                                </button>
+                              )}
+                              {hasQR && (
+                                <div className="flex items-start gap-2 mt-1.5 p-2 rounded-lg bg-background/40 border border-border">
+                                  <img
+                                    src={item.couponQRCode}
+                                    alt="QR Code do cupom"
+                                    className="w-20 h-20 rounded bg-white p-1 flex-shrink-0"
+                                  />
+                                  <a
+                                    href={item.couponUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-[9px] font-mono text-muted-foreground break-all hover:text-neon transition-colors"
+                                    title="Abrir cupom"
+                                  >
+                                    {item.couponUrl}
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                       {item.type === "image" && (
                         <input
@@ -501,6 +617,8 @@ export function ManagementPanel({
                           setEditingMedia(item);
                           setEditName(item.label || item.name);
                           setEditAdvertiserId(item.advertiserId || "");
+                          setEditCouponDiscount(item.couponDiscount || "");
+                          setEditCouponExpiry(item.couponExpiry || "");
                         }}
                         className="text-muted-foreground hover:text-neon transition-colors"
                         title="Editar"
@@ -575,17 +693,52 @@ export function ManagementPanel({
                               </div>
                             </div>
                           )}
+                          {/* Coupon edit fields */}
+                          <div className="space-y-2 p-3 rounded-lg border border-dashed border-border bg-secondary/30">
+                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-display font-semibold">
+                              🎟️ Cupom (opcional)
+                            </p>
+                            <div className="grid grid-cols-2 gap-2">
+                              <input
+                                type="text"
+                                placeholder='Desconto (ex: "10% OFF")'
+                                value={editCouponDiscount}
+                                onChange={(e) => setEditCouponDiscount(e.target.value)}
+                                className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-xs font-body focus:outline-none focus:border-neon/50 transition-colors"
+                              />
+                              <input
+                                type="text"
+                                placeholder='Validade (ex: "24h", "7 dias")'
+                                value={editCouponExpiry}
+                                onChange={(e) => setEditCouponExpiry(e.target.value)}
+                                className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-xs font-body focus:outline-none focus:border-neon/50 transition-colors"
+                              />
+                            </div>
+                            <p className="text-[10px] text-muted-foreground">
+                              Após salvar, clique em "Gerar QR Code" no card para criar/atualizar o QR.
+                            </p>
+                          </div>
                         </div>
                         <div className="flex gap-2 justify-end">
                           <button onClick={() => setEditingMedia(null)} className="px-4 py-2 text-sm font-display rounded-lg border border-border hover:bg-secondary transition-colors">Cancelar</button>
                           <button
                             onClick={async () => {
                               try {
-                                await updateDoc(doc(db, "media", editingMedia.id), {
+                                const trimmedDiscount = editCouponDiscount.trim();
+                                const trimmedExpiry = editCouponExpiry.trim();
+                                const update: Record<string, unknown> = {
                                   name: editName,
                                   label: editName,
-                                  ...(editAdvertiserId ? { advertiserId: editAdvertiserId } : { advertiserId: "" }),
-                                });
+                                  advertiserId: editAdvertiserId || "",
+                                  couponDiscount: trimmedDiscount,
+                                  couponExpiry: trimmedExpiry,
+                                };
+                                // If coupon fields removed, clear stale QR
+                                if (!trimmedDiscount || !trimmedExpiry) {
+                                  update.couponUrl = "";
+                                  update.couponQRCode = "";
+                                }
+                                await updateDoc(doc(db, "media", editingMedia.id), update);
                                 setEditingMedia(null);
                               } catch (err) {
                                 console.error("Erro ao salvar:", err);
