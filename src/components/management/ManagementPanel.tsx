@@ -10,6 +10,7 @@ import { TargetboardTab } from "./TargetboardTab";
 import { AdvertisersTab } from "./AdvertisersTab";
 import type { Advertiser } from "@/lib/types";
 import { Pencil } from "lucide-react";
+import { buildCouponUrl, generateCouponQRCode } from "@/lib/coupon";
 interface ManagementPanelProps {
   open: boolean;
   onClose: () => void;
