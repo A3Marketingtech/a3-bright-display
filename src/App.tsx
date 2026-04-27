@@ -7,6 +7,7 @@ import Display from "./pages/Display.tsx";
 import Admin from "./pages/Admin.tsx";
 import AdvertiserLogin from "./pages/AdvertiserLogin.tsx";
 import AdvertiserDashboard from "./pages/AdvertiserDashboard.tsx";
+import Coupon from "./pages/Coupon.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
