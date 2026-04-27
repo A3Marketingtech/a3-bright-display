@@ -3,7 +3,7 @@ import vanIcon from "@/assets/van-icon.png";
 import a3Logo from "@/assets/a3-logo.png";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
-import type { Advertiser } from "@/lib/types";
+import type { Advertiser, MediaItem } from "@/lib/types";
 import { startTracking, stopTracking, recordImpression, recordInstantEvent } from "@/lib/impressionTracker";
 import type { ImpressionEvent } from "@/components/display/MediaCarousel";
 
