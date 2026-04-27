@@ -50,6 +50,7 @@ const Display = () => {
   const [logoutPassword, setLogoutPassword] = useState("");
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [advertisers, setAdvertisers] = useState<Advertiser[]>([]);
+  const [currentMedia, setCurrentMedia] = useState<MediaItem | null>(null);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "advertisers"), (snap) => {
