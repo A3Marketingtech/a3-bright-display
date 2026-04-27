@@ -693,17 +693,52 @@ export function ManagementPanel({
                               </div>
                             </div>
                           )}
+                          {/* Coupon edit fields */}
+                          <div className="space-y-2 p-3 rounded-lg border border-dashed border-border bg-secondary/30">
+                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-display font-semibold">
+                              🎟️ Cupom (opcional)
+                            </p>
+                            <div className="grid grid-cols-2 gap-2">
+                              <input
+                                type="text"
+                                placeholder='Desconto (ex: "10% OFF")'
+                                value={editCouponDiscount}
+                                onChange={(e) => setEditCouponDiscount(e.target.value)}
+                                className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-xs font-body focus:outline-none focus:border-neon/50 transition-colors"
+                              />
+                              <input
+                                type="text"
+                                placeholder='Validade (ex: "24h", "7 dias")'
+                                value={editCouponExpiry}
+                                onChange={(e) => setEditCouponExpiry(e.target.value)}
+                                className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-xs font-body focus:outline-none focus:border-neon/50 transition-colors"
+                              />
+                            </div>
+                            <p className="text-[10px] text-muted-foreground">
+                              Após salvar, clique em "Gerar QR Code" no card para criar/atualizar o QR.
+                            </p>
+                          </div>
                         </div>
                         <div className="flex gap-2 justify-end">
                           <button onClick={() => setEditingMedia(null)} className="px-4 py-2 text-sm font-display rounded-lg border border-border hover:bg-secondary transition-colors">Cancelar</button>
                           <button
                             onClick={async () => {
                               try {
-                                await updateDoc(doc(db, "media", editingMedia.id), {
+                                const trimmedDiscount = editCouponDiscount.trim();
+                                const trimmedExpiry = editCouponExpiry.trim();
+                                const update: Record<string, unknown> = {
                                   name: editName,
                                   label: editName,
-                                  ...(editAdvertiserId ? { advertiserId: editAdvertiserId } : { advertiserId: "" }),
-                                });
+                                  advertiserId: editAdvertiserId || "",
+                                  couponDiscount: trimmedDiscount,
+                                  couponExpiry: trimmedExpiry,
+                                };
+                                // If coupon fields removed, clear stale QR
+                                if (!trimmedDiscount || !trimmedExpiry) {
+                                  update.couponUrl = "";
+                                  update.couponQRCode = "";
+                                }
+                                await updateDoc(doc(db, "media", editingMedia.id), update);
                                 setEditingMedia(null);
                               } catch (err) {
                                 console.error("Erro ao salvar:", err);
