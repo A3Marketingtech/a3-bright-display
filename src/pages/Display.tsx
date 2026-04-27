@@ -249,7 +249,12 @@ const Display = () => {
           className="relative overflow-hidden"
           style={{ width: "70%", height: "100%", minHeight: 0, minWidth: 0, flexShrink: 0 }}
         >
-          <MediaCarousel items={filteredMedia} tvCapabilities={tvCaps} onImpressionComplete={handleImpression} />
+          <MediaCarousel
+            items={filteredMedia}
+            tvCapabilities={tvCaps}
+            onImpressionComplete={handleImpression}
+            onCurrentItemChange={setCurrentMedia}
+          />
         </div>
 
         {/* Right column: News — 30% */}
