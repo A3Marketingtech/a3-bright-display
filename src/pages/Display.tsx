@@ -276,28 +276,38 @@ const Display = () => {
             )}
           </div>
           <div className="flex flex-col flex-1 min-h-0 gap-[1vh]">
-            <div
-              className="min-h-0"
-              style={{ flex: currentMedia?.couponQRCode ? "0 0 65%" : "1 1 100%" }}
-            >
+            <div className="flex-1 min-h-0">
               <NewsFeed news={news} emptyMessage={newsError ?? "Sem notícias disponíveis"} />
             </div>
-            {currentMedia?.couponQRCode && (
-              <div
-                className="flex flex-col items-center justify-center bg-white rounded-lg p-[0.8vh]"
-                style={{ flex: "0 0 35%" }}
-              >
-                <img
-                  src={currentMedia.couponQRCode}
-                  alt="QR Code do cupom"
-                  className="h-full w-auto object-contain"
-                  style={{ maxHeight: "calc(100% - 1.6vh)" }}
-                />
-                <span className="text-[clamp(0.5rem,0.65vw,0.8rem)] font-display font-semibold tracking-widest uppercase text-black mt-[0.4vh]">
-                  Scan & Save
-                </span>
-              </div>
-            )}
+            <div
+              className="flex flex-col items-center justify-center flex-shrink-0 transition-opacity duration-300"
+              style={{
+                opacity: currentMedia?.couponQRCode ? 1 : 0,
+                pointerEvents: currentMedia?.couponQRCode ? "auto" : "none",
+                background: "rgba(255,255,255,0.05)",
+                borderRadius: "12px",
+                padding: "10px",
+              }}
+              aria-hidden={!currentMedia?.couponQRCode}
+            >
+              {currentMedia?.couponQRCode && (
+                <>
+                  <img
+                    key={currentMedia.id}
+                    src={currentMedia.couponQRCode}
+                    alt="QR Code do cupom"
+                    className="object-contain transition-opacity duration-300"
+                    style={{ width: "120px", height: "120px", maxWidth: "100%" }}
+                  />
+                  <span
+                    className="font-body mt-[6px]"
+                    style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)" }}
+                  >
+                    Scan & Save
+                  </span>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </main>
