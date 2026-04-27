@@ -617,6 +617,8 @@ export function ManagementPanel({
                           setEditingMedia(item);
                           setEditName(item.label || item.name);
                           setEditAdvertiserId(item.advertiserId || "");
+                          setEditCouponDiscount(item.couponDiscount || "");
+                          setEditCouponExpiry(item.couponExpiry || "");
                         }}
                         className="text-muted-foreground hover:text-neon transition-colors"
                         title="Editar"
