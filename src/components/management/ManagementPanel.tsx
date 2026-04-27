@@ -112,11 +112,15 @@ export function ManagementPanel({
       source: resolveMediaSource(url),
       duration: 10,
       ...(selectedAdvertiserId ? { advertiserId: selectedAdvertiserId } : {}),
+      ...(couponDiscount.trim() ? { couponDiscount: couponDiscount.trim() } : {}),
+      ...(couponExpiry.trim() ? { couponExpiry: couponExpiry.trim() } : {}),
     });
     setUrl("");
     setMediaName("");
     setSelectedAdvertiserId("");
-  }, [url, mediaName, mediaType, onAddMedia]);
+    setCouponDiscount("");
+    setCouponExpiry("");
+  }, [url, mediaName, mediaType, onAddMedia, selectedAdvertiserId, couponDiscount, couponExpiry]);
 
   const compressImage = useCallback((file: File, maxWidth = 1280, quality = 0.7): Promise<string> => {
     return new Promise((resolve, reject) => {
