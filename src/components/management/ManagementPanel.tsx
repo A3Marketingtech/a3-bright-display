@@ -190,8 +190,12 @@ export function ManagementPanel({
           source: "local",
           duration: isVideo ? 0 : 10,
           ...(selectedAdvertiserId ? { advertiserId: selectedAdvertiserId } : {}),
+          ...(couponDiscount.trim() ? { couponDiscount: couponDiscount.trim() } : {}),
+          ...(couponExpiry.trim() ? { couponExpiry: couponExpiry.trim() } : {}),
         });
         setSelectedAdvertiserId("");
+        setCouponDiscount("");
+        setCouponExpiry("");
       } catch (err) {
         console.error("Upload failed:", err);
         alert("Erro no upload. Verifique as permissões do Firebase Storage.");
@@ -201,7 +205,7 @@ export function ManagementPanel({
         if (fileInputRef.current) fileInputRef.current.value = "";
       }
     },
-    [onAddMedia]
+    [onAddMedia, selectedAdvertiserId, couponDiscount, couponExpiry]
   );
 
   const handleTestWeather = async () => {
