@@ -66,7 +66,8 @@ export function MediaCarousel({ items, tvCapabilities, onImpressionComplete, onC
   // Track impression when slide changes
   useEffect(function () {
     slideStartRef.current = new Date();
-  }, [current]);
+    if (onCurrentItemChange) onCurrentItemChange(currentItem || null);
+  }, [current, currentItem, onCurrentItemChange]);
 
   var emitImpression = useCallback(function () {
     if (!currentItem || !onImpressionComplete) return;
