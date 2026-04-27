@@ -23,6 +23,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/advertiser" element={<AdvertiserLogin />} />
           <Route path="/advertiser/dashboard" element={<AdvertiserDashboard />} />
+          <Route path="/coupon/:mediaId" element={<Coupon />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </HashRouter>
