@@ -400,6 +400,28 @@ export function ManagementPanel({
                         ))}
                       </select>
                     </div>
+                    {/* Coupon fields (shared with Upload below) */}
+                    <div className="space-y-2 p-3 rounded-lg border border-dashed border-border bg-secondary/30">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-display font-semibold">
+                        🎟️ Cupom (opcional) — aplica também ao upload abaixo
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          placeholder='Desconto (ex: "10% OFF")'
+                          value={couponDiscount}
+                          onChange={(e) => setCouponDiscount(e.target.value)}
+                          className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-xs font-body focus:outline-none focus:border-neon/50 transition-colors"
+                        />
+                        <input
+                          type="text"
+                          placeholder='Validade (ex: "24h", "7 dias")'
+                          value={couponExpiry}
+                          onChange={(e) => setCouponExpiry(e.target.value)}
+                          className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-xs font-body focus:outline-none focus:border-neon/50 transition-colors"
+                        />
+                      </div>
+                    </div>
                     <button
                       onClick={handleAddUrl}
                       disabled={!url}
