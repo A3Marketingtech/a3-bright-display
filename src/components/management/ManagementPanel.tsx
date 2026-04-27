@@ -536,6 +536,68 @@ export function ManagementPanel({
                             );
                           })}
                         </div>
+                        {/* QR Code coupon section */}
+                        {(() => {
+                          const hasFields = !!(item.couponDiscount && item.couponExpiry);
+                          const hasQR = !!item.couponQRCode;
+                          const status = !hasFields ? "none" : hasQR ? "active" : "ready";
+                          const statusLabel =
+                            status === "none"
+                              ? "⚪ Sem QR Code"
+                              : status === "ready"
+                              ? "🟡 Pronto para gerar"
+                              : "✅ QR Code ativo";
+                          return (
+                            <div className="mt-2 space-y-1.5">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-[10px] font-display font-semibold text-muted-foreground">
+                                  {statusLabel}
+                                </span>
+                                {item.couponDiscount && (
+                                  <span className="text-[10px] font-display font-semibold px-1.5 py-0.5 rounded bg-neon/10 text-neon">
+                                    {item.couponDiscount}
+                                  </span>
+                                )}
+                                {item.couponExpiry && (
+                                  <span className="text-[10px] font-display text-muted-foreground">
+                                    • {item.couponExpiry}
+                                  </span>
+                                )}
+                              </div>
+                              {hasFields && (
+                                <button
+                                  onClick={() => handleGenerateQR(item)}
+                                  disabled={generatingQrId === item.id}
+                                  className="text-[10px] font-display font-semibold px-2 py-1 rounded bg-neon text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
+                                >
+                                  {generatingQrId === item.id
+                                    ? "Gerando…"
+                                    : hasQR
+                                    ? "Regenerar QR Code"
+                                    : "Gerar QR Code"}
+                                </button>
+                              )}
+                              {hasQR && (
+                                <div className="flex items-start gap-2 mt-1.5 p-2 rounded-lg bg-background/40 border border-border">
+                                  <img
+                                    src={item.couponQRCode}
+                                    alt="QR Code do cupom"
+                                    className="w-20 h-20 rounded bg-white p-1 flex-shrink-0"
+                                  />
+                                  <a
+                                    href={item.couponUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-[9px] font-mono text-muted-foreground break-all hover:text-neon transition-colors"
+                                    title="Abrir cupom"
+                                  >
+                                    {item.couponUrl}
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                       {item.type === "image" && (
                         <input
