@@ -52,7 +52,12 @@ export function ManagementPanel({
   const [editingMedia, setEditingMedia] = useState<MediaItem | null>(null);
   const [editName, setEditName] = useState("");
   const [editAdvertiserId, setEditAdvertiserId] = useState("");
+  const [editCouponDiscount, setEditCouponDiscount] = useState("");
+  const [editCouponExpiry, setEditCouponExpiry] = useState("");
   const [deletingMediaId, setDeletingMediaId] = useState<string | null>(null);
+  const [couponDiscount, setCouponDiscount] = useState("");
+  const [couponExpiry, setCouponExpiry] = useState("");
+  const [generatingQrId, setGeneratingQrId] = useState<string | null>(null);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "categories"), (snap) => {
