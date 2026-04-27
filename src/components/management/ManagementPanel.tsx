@@ -260,6 +260,24 @@ export function ManagementPanel({
     }
   }, []);
 
+  const handleGenerateQR = useCallback(async (item: MediaItem) => {
+    if (!item.couponDiscount || !item.couponExpiry) return;
+    setGeneratingQrId(item.id);
+    try {
+      const url = buildCouponUrl(item.id);
+      const qr = await generateCouponQRCode(url);
+      await updateDoc(doc(db, "media", item.id), {
+        couponUrl: url,
+        couponQRCode: qr,
+      });
+    } catch (err) {
+      console.error("Erro ao gerar QR Code:", err);
+      alert("Erro ao gerar QR Code.");
+    } finally {
+      setGeneratingQrId(null);
+    }
+  }, []);
+
   return (
     <AnimatePresence>
       {open && (
