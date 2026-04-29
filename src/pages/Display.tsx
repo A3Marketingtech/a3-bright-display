@@ -51,6 +51,21 @@ const Display = () => {
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [advertisers, setAdvertisers] = useState<Advertiser[]>([]);
   const [currentMedia, setCurrentMedia] = useState<MediaItem | null>(null);
+  const [promoIndex, setPromoIndex] = useState(0);
+  const [promoVisible, setPromoVisible] = useState(true);
+  const hasCoupon = !!currentMedia?.couponQRCode;
+
+  useEffect(() => {
+    if (hasCoupon) return;
+    const fadeOut = setInterval(() => {
+      setPromoVisible(false);
+      setTimeout(() => {
+        setPromoIndex((i) => (i + 1) % 3);
+        setPromoVisible(true);
+      }, 300);
+    }, 8000);
+    return () => clearInterval(fadeOut);
+  }, [hasCoupon]);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "advertisers"), (snap) => {
