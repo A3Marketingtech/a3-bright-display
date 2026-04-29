@@ -51,6 +51,21 @@ const Display = () => {
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [advertisers, setAdvertisers] = useState<Advertiser[]>([]);
   const [currentMedia, setCurrentMedia] = useState<MediaItem | null>(null);
+  const [promoIndex, setPromoIndex] = useState(0);
+  const [promoVisible, setPromoVisible] = useState(true);
+  const hasCoupon = !!currentMedia?.couponQRCode;
+
+  useEffect(() => {
+    if (hasCoupon) return;
+    const fadeOut = setInterval(() => {
+      setPromoVisible(false);
+      setTimeout(() => {
+        setPromoIndex((i) => (i + 1) % 3);
+        setPromoVisible(true);
+      }, 300);
+    }, 8000);
+    return () => clearInterval(fadeOut);
+  }, [hasCoupon]);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "advertisers"), (snap) => {
@@ -281,151 +296,188 @@ const Display = () => {
         </div>
       </main>
 
-      {/* ── 3b. QR STRIP (95px, full width) — only when active media has couponQRCode ── */}
-      {currentMedia?.couponQRCode && (
+      {/* ── 3b. BOTTOM STRIP (95px, full width) — always visible ── */}
+      <div
+        className="w-full relative"
+        style={{
+          height: "95px",
+          flexShrink: 0,
+          background: "linear-gradient(90deg, #050d05, #0a130a, #060e06)",
+          borderTop: "1px solid rgba(123,193,66,0.15)",
+        }}
+      >
+        {/* Decorative top line */}
         <div
-          className="w-full flex items-center justify-between transition-opacity duration-300 relative"
-          style={{
-            height: "95px",
-            flexShrink: 0,
-            background: "linear-gradient(90deg, #050d05, #0a130a, #060e06)",
-            borderTop: "1px solid rgba(123,193,66,0.15)",
-            padding: "10px 18px",
-            opacity: 1,
-          }}
-        >
-          {/* Decorative top line */}
+          className="absolute top-0 left-0 right-0"
+          style={{ height: "1px", background: "linear-gradient(90deg, transparent, rgba(123,193,66,0.25), transparent)" }}
+        />
+
+        {hasCoupon ? (
           <div
-            className="absolute top-0 left-0 right-0"
-            style={{ height: "1px", background: "linear-gradient(90deg, transparent, rgba(123,193,66,0.25), transparent)" }}
-          />
-
-          {/* Left block: Exclusive Offers */}
-          <div className="flex items-center gap-3">
-            <div
-              className="flex items-center justify-center"
-              style={{
-                width: "38px",
-                height: "38px",
-                border: "1.5px solid #7bc142",
-                borderRadius: "6px",
-                color: "#7bc142",
-                fontWeight: 900,
-                fontSize: "18px",
-              }}
-            >
-              %
-            </div>
-            <div className="flex flex-col justify-center">
-              <span style={{ fontSize: "12px", fontWeight: 900, color: "#7bc142", letterSpacing: "1.5px" }}>
-                EXCLUSIVE OFFERS
-              </span>
-              <span style={{ fontSize: "9px", fontWeight: 700, color: "#fff", marginTop: "1px" }}>
-                JUST FOR YOU
-              </span>
-            </div>
-            <div className="flex items-center gap-2 ml-2">
-              {[
-                { label: "DISCOUNTS", sub: "UP TO 30% OFF" },
-                { label: "LOCAL DEALS", sub: "EVERY DAY" },
-                { label: "CURATED", sub: "FOR YOU" },
-              ].map((tag, i, arr) => (
-                <div key={tag.label} className="flex items-center gap-2">
-                  <div className="flex flex-col">
-                    <span style={{ fontSize: "8px", color: "#7bc142", fontWeight: 700, letterSpacing: "0.5px" }}>
-                      {tag.label}
-                    </span>
-                    <span style={{ fontSize: "8px", color: "#666" }}>{tag.sub}</span>
-                  </div>
-                  {i < arr.length - 1 && (
-                    <div style={{ width: "1px", height: "14px", background: "#222" }} />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Center divider */}
-          <div
-            style={{
-              width: "1px",
-              height: "56px",
-              background: "linear-gradient(180deg, transparent, rgba(123,193,66,0.3), transparent)",
-            }}
-          />
-
-          {/* Right block: Scan & Save + QR */}
-          <div className="flex items-center gap-3">
-            <div className="flex flex-col items-end justify-center">
-              <span style={{ fontSize: "12px", fontWeight: 900, color: "#7bc142", letterSpacing: "1.5px" }}>
-                SCAN & SAVE
-              </span>
-              <span style={{ fontSize: "8px", color: "#bbb", marginTop: "1px" }}>
-                Open camera and scan the QR code.
-              </span>
-            </div>
-            {/* Curved arrow */}
-            <svg width="28" height="28" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-              <path
-                d="M2 6 C 8 6, 14 8, 18 14"
-                stroke="#7bc142"
-                strokeWidth="1.5"
-                fill="none"
-                strokeLinecap="round"
-              />
-              <path
-                d="M14 13 L18 14 L17 10"
-                stroke="#7bc142"
-                strokeWidth="1.5"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            {/* QR with corner frame */}
-            <div className="relative" style={{ width: "84px", height: "84px" }}>
-              {/* Corner brackets */}
-              {[
-                { top: 0, left: 0, borderTop: "2px solid #7bc142", borderLeft: "2px solid #7bc142" },
-                { top: 0, right: 0, borderTop: "2px solid #7bc142", borderRight: "2px solid #7bc142" },
-                { bottom: 0, left: 0, borderBottom: "2px solid #7bc142", borderLeft: "2px solid #7bc142" },
-                { bottom: 0, right: 0, borderBottom: "2px solid #7bc142", borderRight: "2px solid #7bc142" },
-              ].map((s, i) => (
-                <div key={i} style={{ position: "absolute", width: "15px", height: "15px", ...s }} />
-              ))}
+            key={currentMedia?.id}
+            className="w-full h-full flex items-center justify-between transition-opacity duration-300 animate-fade-in"
+            style={{ padding: "10px 18px", opacity: 1 }}
+          >
+            {/* Left block: Exclusive Offers */}
+            <div className="flex items-center gap-3">
               <div
                 className="flex items-center justify-center"
                 style={{
-                  position: "absolute",
-                  top: "4px",
-                  left: "4px",
-                  width: "76px",
-                  height: "76px",
-                  background: "#fff",
-                  borderRadius: "5px",
-                  padding: "3px",
+                  width: "38px",
+                  height: "38px",
+                  border: "1.5px solid #7bc142",
+                  borderRadius: "6px",
+                  color: "#7bc142",
+                  fontWeight: 900,
+                  fontSize: "18px",
                 }}
               >
-                <img
-                  key={currentMedia.id}
-                  src={currentMedia.couponQRCode}
-                  alt="QR Code do cupom"
-                  className="object-contain transition-opacity duration-300"
-                  style={{ width: "100%", height: "100%" }}
-                />
+                %
+              </div>
+              <div className="flex flex-col justify-center">
+                <span style={{ fontSize: "12px", fontWeight: 900, color: "#7bc142", letterSpacing: "1.5px" }}>
+                  EXCLUSIVE OFFERS
+                </span>
+                <span style={{ fontSize: "9px", fontWeight: 700, color: "#fff", marginTop: "1px" }}>
+                  JUST FOR YOU
+                </span>
+              </div>
+              <div className="flex items-center gap-2 ml-2">
+                {[
+                  { label: "DISCOUNTS", sub: "UP TO 30% OFF" },
+                  { label: "LOCAL DEALS", sub: "EVERY DAY" },
+                  { label: "CURATED", sub: "FOR YOU" },
+                ].map((tag, i, arr) => (
+                  <div key={tag.label} className="flex items-center gap-2">
+                    <div className="flex flex-col">
+                      <span style={{ fontSize: "8px", color: "#7bc142", fontWeight: 700, letterSpacing: "0.5px" }}>
+                        {tag.label}
+                      </span>
+                      <span style={{ fontSize: "8px", color: "#666" }}>{tag.sub}</span>
+                    </div>
+                    {i < arr.length - 1 && (
+                      <div style={{ width: "1px", height: "14px", background: "#222" }} />
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
-            {currentMedia.couponDiscount && (
-              <div
-                className="flex items-center justify-center"
-                style={{ fontSize: "9px", fontWeight: 700, color: "#7bc142", minWidth: "44px", textAlign: "center" }}
-              >
-                {currentMedia.couponDiscount}
+
+            {/* Center divider */}
+            <div
+              style={{
+                width: "1px",
+                height: "56px",
+                background: "linear-gradient(180deg, transparent, rgba(123,193,66,0.3), transparent)",
+              }}
+            />
+
+            {/* Right block: Scan & Save + QR */}
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col items-end justify-center">
+                <span style={{ fontSize: "12px", fontWeight: 900, color: "#7bc142", letterSpacing: "1.5px" }}>
+                  SCAN & SAVE
+                </span>
+                <span style={{ fontSize: "8px", color: "#bbb", marginTop: "1px" }}>
+                  Open camera and scan the QR code.
+                </span>
               </div>
+              <svg width="28" height="28" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                <path d="M2 6 C 8 6, 14 8, 18 14" stroke="#7bc142" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                <path d="M14 13 L18 14 L17 10" stroke="#7bc142" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <div className="relative" style={{ width: "84px", height: "84px" }}>
+                {[
+                  { top: 0, left: 0, borderTop: "2px solid #7bc142", borderLeft: "2px solid #7bc142" },
+                  { top: 0, right: 0, borderTop: "2px solid #7bc142", borderRight: "2px solid #7bc142" },
+                  { bottom: 0, left: 0, borderBottom: "2px solid #7bc142", borderLeft: "2px solid #7bc142" },
+                  { bottom: 0, right: 0, borderBottom: "2px solid #7bc142", borderRight: "2px solid #7bc142" },
+                ].map((s, i) => (
+                  <div key={i} style={{ position: "absolute", width: "15px", height: "15px", ...s }} />
+                ))}
+                <div
+                  className="flex items-center justify-center"
+                  style={{
+                    position: "absolute",
+                    top: "4px",
+                    left: "4px",
+                    width: "76px",
+                    height: "76px",
+                    background: "#fff",
+                    borderRadius: "5px",
+                    padding: "3px",
+                  }}
+                >
+                  <img
+                    src={currentMedia!.couponQRCode}
+                    alt="QR Code do cupom"
+                    className="object-contain"
+                    style={{ width: "100%", height: "100%" }}
+                  />
+                </div>
+              </div>
+              {currentMedia?.couponDiscount && (
+                <div
+                  className="flex items-center justify-center"
+                  style={{ fontSize: "9px", fontWeight: 700, color: "#7bc142", minWidth: "44px", textAlign: "center" }}
+                >
+                  {currentMedia.couponDiscount}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div
+            className="w-full h-full flex items-center justify-between transition-opacity duration-300"
+            style={{ padding: "0 24px", opacity: promoVisible ? 1 : 0 }}
+          >
+            {promoIndex === 0 && (
+              <>
+                <div className="flex items-center gap-3">
+                  <span style={{ fontSize: "22px", color: "#7bc142" }}>📢</span>
+                  <div className="flex flex-col">
+                    <span style={{ fontSize: "11px", fontWeight: 900, color: "#7bc142" }}>Quer anunciar aqui?</span>
+                    <span style={{ fontSize: "8px", color: "#aaa", marginTop: "1px" }}>
+                      Leve sua marca para dentro dos carros. Fale com a gente.
+                    </span>
+                  </div>
+                </div>
+                <span style={{ fontSize: "9px", color: "#7bc142", fontWeight: 700 }}>ridemkg.com</span>
+              </>
+            )}
+            {promoIndex === 1 && (
+              <>
+                <div className="flex flex-col">
+                  <span style={{ fontSize: "13px", fontWeight: 900, color: "#7bc142", letterSpacing: "3px" }}>RIDEMKG</span>
+                  <span style={{ fontSize: "8px", color: "#aaa", marginTop: "2px" }}>
+                    Mídia embarcada premium • Orlando, FL
+                  </span>
+                </div>
+                <span style={{ fontSize: "9px", color: "#7bc142", fontWeight: 700 }}>ridemkg.com</span>
+              </>
+            )}
+            {promoIndex === 2 && (
+              <>
+                <div className="flex flex-col">
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "#fff" }}>
+                    Aproveite as ofertas exclusivas dos nossos parceiros
+                  </span>
+                  <span style={{ fontSize: "8px", color: "#aaa", marginTop: "2px" }}>
+                    Escaneie o QR Code nos anúncios e economize na sua próxima visita.
+                  </span>
+                </div>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect x="3" y="3" width="7" height="7" stroke="#7bc142" strokeWidth="1.5" />
+                  <rect x="14" y="3" width="7" height="7" stroke="#7bc142" strokeWidth="1.5" />
+                  <rect x="3" y="14" width="7" height="7" stroke="#7bc142" strokeWidth="1.5" />
+                  <rect x="14" y="14" width="3" height="3" fill="#7bc142" />
+                  <rect x="18" y="18" width="3" height="3" fill="#7bc142" />
+                </svg>
+              </>
             )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* ── 4. FOOTER (~8%) ── */}
       <footer
