@@ -244,10 +244,10 @@ const Display = () => {
         className="flex overflow-hidden"
         style={{ height: "78vh", minHeight: 0 }}
       >
-        {/* Left column: Ad / Media — 70% */}
+        {/* Left column: Ad / Media — 79% */}
         <div
           className="relative overflow-hidden"
-          style={{ width: "70%", height: "100%", minHeight: 0, minWidth: 0, flexShrink: 0 }}
+          style={{ width: "79%", height: "100%", minHeight: 0, minWidth: 0, flexShrink: 0 }}
         >
           <MediaCarousel
             items={filteredMedia}
@@ -257,60 +257,175 @@ const Display = () => {
           />
         </div>
 
-        {/* Right column: News — 30% */}
+        {/* Right column: News — 21% */}
         <div
           className="flex flex-col overflow-hidden"
-          style={{ width: "30%", height: "100%", flexShrink: 0, padding: "1.2vh 1.2vw" }}
+          style={{ width: "21%", height: "100%", flexShrink: 0, padding: "10px 8px", background: "#0f0f0f" }}
         >
           <div className="flex items-center justify-between mb-[1vh]">
-            <div className="flex items-center gap-[0.5vw]">
-              <span className="text-[clamp(0.7rem,0.85vw,1rem)]">📰</span>
-              <span className="text-[clamp(0.6rem,0.75vw,0.9rem)] font-display font-semibold text-muted-foreground tracking-wide uppercase">
-                Notícias Locais
-              </span>
-            </div>
+            <span
+              className="font-display uppercase"
+              style={{ fontSize: "7px", color: "#555", letterSpacing: "1.5px" }}
+            >
+              Noticias Locais
+            </span>
             {timeAgoLabel && (
-              <span className="text-[clamp(0.45rem,0.55vw,0.65rem)] text-muted-foreground/60 font-body">
+              <span style={{ fontSize: "6px", color: "#555" }} className="font-body">
                 {timeAgoLabel}
               </span>
             )}
           </div>
-          <div className="flex flex-col flex-1 min-h-0 gap-[1vh]">
-            <div className="flex-1 min-h-0">
-              <NewsFeed news={news} emptyMessage={newsError ?? "Sem notícias disponíveis"} />
-            </div>
-            <div
-              className="flex flex-col items-center justify-center flex-shrink-0 transition-opacity duration-300"
-              style={{
-                opacity: currentMedia?.couponQRCode ? 1 : 0,
-                pointerEvents: currentMedia?.couponQRCode ? "auto" : "none",
-                background: "rgba(255,255,255,0.05)",
-                borderRadius: "12px",
-                padding: "10px",
-              }}
-              aria-hidden={!currentMedia?.couponQRCode}
-            >
-              {currentMedia?.couponQRCode && (
-                <>
-                  <img
-                    key={currentMedia.id}
-                    src={currentMedia.couponQRCode}
-                    alt="QR Code do cupom"
-                    className="object-contain transition-opacity duration-300"
-                    style={{ width: "120px", height: "120px", maxWidth: "100%" }}
-                  />
-                  <span
-                    className="font-body mt-[6px]"
-                    style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)" }}
-                  >
-                    Scan & Save
-                  </span>
-                </>
-              )}
-            </div>
+          <div className="flex-1 min-h-0">
+            <NewsFeed news={news} emptyMessage={newsError ?? "Sem notícias disponíveis"} />
           </div>
         </div>
       </main>
+
+      {/* ── 3b. QR STRIP (68px, full width) — only when active media has couponQRCode ── */}
+      {currentMedia?.couponQRCode && (
+        <div
+          className="w-full flex items-center justify-between transition-opacity duration-300 relative"
+          style={{
+            height: "68px",
+            flexShrink: 0,
+            background: "linear-gradient(90deg, #050d05, #0a130a, #060e06)",
+            borderTop: "1px solid rgba(123,193,66,0.15)",
+            padding: "0 18px",
+            opacity: 1,
+          }}
+        >
+          {/* Decorative top line */}
+          <div
+            className="absolute top-0 left-0 right-0"
+            style={{ height: "1px", background: "linear-gradient(90deg, transparent, rgba(123,193,66,0.25), transparent)" }}
+          />
+
+          {/* Left block: Exclusive Offers */}
+          <div className="flex items-center gap-3">
+            <div
+              className="flex items-center justify-center"
+              style={{
+                width: "28px",
+                height: "28px",
+                border: "1.5px solid #7bc142",
+                borderRadius: "6px",
+                color: "#7bc142",
+                fontWeight: 900,
+                fontSize: "13px",
+              }}
+            >
+              %
+            </div>
+            <div className="flex flex-col justify-center">
+              <span style={{ fontSize: "9px", fontWeight: 900, color: "#7bc142", letterSpacing: "1.5px" }}>
+                EXCLUSIVE OFFERS
+              </span>
+              <span style={{ fontSize: "7px", fontWeight: 700, color: "#fff", marginTop: "1px" }}>
+                JUST FOR YOU
+              </span>
+            </div>
+            <div className="flex items-center gap-2 ml-2">
+              {[
+                { label: "DISCOUNTS", sub: "UP TO 30% OFF" },
+                { label: "LOCAL DEALS", sub: "EVERY DAY" },
+                { label: "CURATED", sub: "FOR YOU" },
+              ].map((tag, i, arr) => (
+                <div key={tag.label} className="flex items-center gap-2">
+                  <div className="flex flex-col">
+                    <span style={{ fontSize: "6px", color: "#7bc142", fontWeight: 700, letterSpacing: "0.5px" }}>
+                      {tag.label}
+                    </span>
+                    <span style={{ fontSize: "6px", color: "#666" }}>{tag.sub}</span>
+                  </div>
+                  {i < arr.length - 1 && (
+                    <div style={{ width: "1px", height: "10px", background: "#222" }} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Center divider */}
+          <div
+            style={{
+              width: "1px",
+              height: "40px",
+              background: "linear-gradient(180deg, transparent, rgba(123,193,66,0.3), transparent)",
+            }}
+          />
+
+          {/* Right block: Scan & Save + QR */}
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-end justify-center">
+              <span style={{ fontSize: "9px", fontWeight: 900, color: "#7bc142", letterSpacing: "1.5px" }}>
+                SCAN & SAVE
+              </span>
+              <span style={{ fontSize: "6px", color: "#bbb", marginTop: "1px" }}>
+                Open camera and scan the QR code.
+              </span>
+            </div>
+            {/* Curved arrow */}
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+              <path
+                d="M2 6 C 8 6, 14 8, 18 14"
+                stroke="#7bc142"
+                strokeWidth="1.5"
+                fill="none"
+                strokeLinecap="round"
+              />
+              <path
+                d="M14 13 L18 14 L17 10"
+                stroke="#7bc142"
+                strokeWidth="1.5"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {/* QR with corner frame */}
+            <div className="relative" style={{ width: "60px", height: "60px" }}>
+              {/* Corner brackets */}
+              {[
+                { top: 0, left: 0, borderTop: "2px solid #7bc142", borderLeft: "2px solid #7bc142" },
+                { top: 0, right: 0, borderTop: "2px solid #7bc142", borderRight: "2px solid #7bc142" },
+                { bottom: 0, left: 0, borderBottom: "2px solid #7bc142", borderLeft: "2px solid #7bc142" },
+                { bottom: 0, right: 0, borderBottom: "2px solid #7bc142", borderRight: "2px solid #7bc142" },
+              ].map((s, i) => (
+                <div key={i} style={{ position: "absolute", width: "11px", height: "11px", ...s }} />
+              ))}
+              <div
+                className="flex items-center justify-center"
+                style={{
+                  position: "absolute",
+                  top: "3px",
+                  left: "3px",
+                  width: "54px",
+                  height: "54px",
+                  background: "#fff",
+                  borderRadius: "5px",
+                  padding: "3px",
+                }}
+              >
+                <img
+                  key={currentMedia.id}
+                  src={currentMedia.couponQRCode}
+                  alt="QR Code do cupom"
+                  className="object-contain transition-opacity duration-300"
+                  style={{ width: "100%", height: "100%" }}
+                />
+              </div>
+            </div>
+            {currentMedia.couponDiscount && (
+              <div
+                className="flex items-center justify-center"
+                style={{ fontSize: "6px", fontWeight: 700, color: "#7bc142", minWidth: "40px", textAlign: "center" }}
+              >
+                {currentMedia.couponDiscount}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── 4. FOOTER (~8%) ── */}
       <footer
