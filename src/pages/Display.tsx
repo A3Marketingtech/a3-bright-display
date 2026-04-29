@@ -281,16 +281,16 @@ const Display = () => {
         </div>
       </main>
 
-      {/* ── 3b. QR STRIP (68px, full width) — only when active media has couponQRCode ── */}
+      {/* ── 3b. QR STRIP (95px, full width) — only when active media has couponQRCode ── */}
       {currentMedia?.couponQRCode && (
         <div
           className="w-full flex items-center justify-between transition-opacity duration-300 relative"
           style={{
-            height: "68px",
+            height: "95px",
             flexShrink: 0,
             background: "linear-gradient(90deg, #050d05, #0a130a, #060e06)",
             borderTop: "1px solid rgba(123,193,66,0.15)",
-            padding: "0 18px",
+            padding: "10px 18px",
             opacity: 1,
           }}
         >
@@ -305,22 +305,22 @@ const Display = () => {
             <div
               className="flex items-center justify-center"
               style={{
-                width: "28px",
-                height: "28px",
+                width: "38px",
+                height: "38px",
                 border: "1.5px solid #7bc142",
                 borderRadius: "6px",
                 color: "#7bc142",
                 fontWeight: 900,
-                fontSize: "13px",
+                fontSize: "18px",
               }}
             >
               %
             </div>
             <div className="flex flex-col justify-center">
-              <span style={{ fontSize: "9px", fontWeight: 900, color: "#7bc142", letterSpacing: "1.5px" }}>
+              <span style={{ fontSize: "12px", fontWeight: 900, color: "#7bc142", letterSpacing: "1.5px" }}>
                 EXCLUSIVE OFFERS
               </span>
-              <span style={{ fontSize: "7px", fontWeight: 700, color: "#fff", marginTop: "1px" }}>
+              <span style={{ fontSize: "9px", fontWeight: 700, color: "#fff", marginTop: "1px" }}>
                 JUST FOR YOU
               </span>
             </div>
@@ -332,13 +332,13 @@ const Display = () => {
               ].map((tag, i, arr) => (
                 <div key={tag.label} className="flex items-center gap-2">
                   <div className="flex flex-col">
-                    <span style={{ fontSize: "6px", color: "#7bc142", fontWeight: 700, letterSpacing: "0.5px" }}>
+                    <span style={{ fontSize: "8px", color: "#7bc142", fontWeight: 700, letterSpacing: "0.5px" }}>
                       {tag.label}
                     </span>
-                    <span style={{ fontSize: "6px", color: "#666" }}>{tag.sub}</span>
+                    <span style={{ fontSize: "8px", color: "#666" }}>{tag.sub}</span>
                   </div>
                   {i < arr.length - 1 && (
-                    <div style={{ width: "1px", height: "10px", background: "#222" }} />
+                    <div style={{ width: "1px", height: "14px", background: "#222" }} />
                   )}
                 </div>
               ))}
@@ -349,7 +349,7 @@ const Display = () => {
           <div
             style={{
               width: "1px",
-              height: "40px",
+              height: "56px",
               background: "linear-gradient(180deg, transparent, rgba(123,193,66,0.3), transparent)",
             }}
           />
@@ -357,15 +357,15 @@ const Display = () => {
           {/* Right block: Scan & Save + QR */}
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-end justify-center">
-              <span style={{ fontSize: "9px", fontWeight: 900, color: "#7bc142", letterSpacing: "1.5px" }}>
+              <span style={{ fontSize: "12px", fontWeight: 900, color: "#7bc142", letterSpacing: "1.5px" }}>
                 SCAN & SAVE
               </span>
-              <span style={{ fontSize: "6px", color: "#bbb", marginTop: "1px" }}>
+              <span style={{ fontSize: "8px", color: "#bbb", marginTop: "1px" }}>
                 Open camera and scan the QR code.
               </span>
             </div>
             {/* Curved arrow */}
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 22 22" fill="none" aria-hidden="true">
               <path
                 d="M2 6 C 8 6, 14 8, 18 14"
                 stroke="#7bc142"
@@ -383,7 +383,7 @@ const Display = () => {
               />
             </svg>
             {/* QR with corner frame */}
-            <div className="relative" style={{ width: "60px", height: "60px" }}>
+            <div className="relative" style={{ width: "84px", height: "84px" }}>
               {/* Corner brackets */}
               {[
                 { top: 0, left: 0, borderTop: "2px solid #7bc142", borderLeft: "2px solid #7bc142" },
@@ -391,16 +391,16 @@ const Display = () => {
                 { bottom: 0, left: 0, borderBottom: "2px solid #7bc142", borderLeft: "2px solid #7bc142" },
                 { bottom: 0, right: 0, borderBottom: "2px solid #7bc142", borderRight: "2px solid #7bc142" },
               ].map((s, i) => (
-                <div key={i} style={{ position: "absolute", width: "11px", height: "11px", ...s }} />
+                <div key={i} style={{ position: "absolute", width: "15px", height: "15px", ...s }} />
               ))}
               <div
                 className="flex items-center justify-center"
                 style={{
                   position: "absolute",
-                  top: "3px",
-                  left: "3px",
-                  width: "54px",
-                  height: "54px",
+                  top: "4px",
+                  left: "4px",
+                  width: "76px",
+                  height: "76px",
                   background: "#fff",
                   borderRadius: "5px",
                   padding: "3px",
@@ -418,7 +418,7 @@ const Display = () => {
             {currentMedia.couponDiscount && (
               <div
                 className="flex items-center justify-center"
-                style={{ fontSize: "6px", fontWeight: 700, color: "#7bc142", minWidth: "40px", textAlign: "center" }}
+                style={{ fontSize: "9px", fontWeight: 700, color: "#7bc142", minWidth: "44px", textAlign: "center" }}
               >
                 {currentMedia.couponDiscount}
               </div>
